@@ -1,23 +1,25 @@
 # VIT-Student-API
 ##Features
-<ul>
-<li>Faculty Information</li>
-<li>Marks</li>
-<li>Course Page</li>
-<li>Attendance</li>
-<li>Academic History</li>
-<li>Exam schedule</li>
-and many more.
-</ul>
+
+> Faculty Information <br />
+ Marks <br />
+ Course Page <br />
+ Attendance <br />
+ Academic History <br />
+ Exam schedule <br />
+ Change Password <br />
+ 
+and many more...... <br />
+
 
 ##Language used :
-<b>Python</b>
+> Python
+
 ##Framework used 
-<b>Tornado</b>
-##Made with ❤ by :
-<ul>
-<li>Ashwini Purohit</li>
-<li>Piyush Goyal</li>
-</ul>
-## To contribute, please send pull requests. Your contribution matters. :) 
+> Tornado
+
+##Made by :
+> Piyush Goyal
+
+## To contribute, please send pull requests
 ##By: GDG VIT VELLORE
