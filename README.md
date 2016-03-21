@@ -12,14 +12,14 @@
 and many more...... <br />
 
 
-##Language used :
+##Language:
 > Python
 
-##Framework used 
+##Framework:
 > Tornado
 
-##Made by :
+##Made by:
 > Piyush Goyal
 
-## To contribute, please send pull requests
-##By: GDG VIT VELLORE
+#### To contribute, please send pull requests
+#### By: *GDG VIT VELLORE*
