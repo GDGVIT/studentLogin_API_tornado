@@ -1,9 +1,10 @@
 def login(reg_no="",pwd=""):
 
+	#importing the required modules
 	from bs4 import BeautifulSoup
 	from CaptchaParser import CaptchaParser
 	from PIL import Image
-	import json, mechanize, datetime
+	import mechanize
 
 
     #handeling browser and browser initialisation
@@ -24,17 +25,21 @@ def login(reg_no="",pwd=""):
 	#extracting captcha url
 	soup = BeautifulSoup(response.get_data())
 	img = soup.find('img', id='imgCaptcha')
-	print img['src']
+	#print img['src']
 
 	#retrieving captcha image
 	br.retrieve("https://academics.vit.ac.in/student/"+img['src'], reg_no+".bmp")
 	print "captcha retrieved"
+
+	#opening the image
 	img = Image.open(reg_no+".bmp")
+
+	#parsing the image and getting its string value
 	parser = CaptchaParser()
 	captcha = parser.getCaptcha(img)
 	print str(captcha)
 
-	#fill form
+	#filling form
 	br["regno"] = str(reg_no)
 	br["passwd"] = str(pwd)
 	br["vrfcd"] = str(captcha)
@@ -43,12 +48,17 @@ def login(reg_no="",pwd=""):
 	br.method = "POST"
 	response = br.submit()
 
+	#during the time of rivera
 	try:
+
 		br.open("https://academics.vit.ac.in/student/stud_home.asp")
 		br.select_form("stud_riviera")
 		br.submit(label = "Skip Now")
+		print "Login_Sucess"
+
+	#for normal login
 	except:
-		print "ss"
-		print "sucess"
+
+		print "Login_Sucess"
 		
 	return br

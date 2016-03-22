@@ -3,13 +3,14 @@ from bs4 import BeautifulSoup
 
 def changePassword(reg_no = "", pwd = "", newpwd = ""):
 
+	#logging in
 	br = login(reg_no,pwd)
 
-	print br.geturl()
-
+	#checking that are we logged in or not
 	if br.geturl() == ("https://academics.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
+		#opening the change password page
 		br.open("https://academics.vit.ac.in/student/changepswd.asp")
 		response = br.open("https://academics.vit.ac.in/student/changepswd.asp")
 
@@ -25,6 +26,7 @@ def changePassword(reg_no = "", pwd = "", newpwd = ""):
 		br.method = "POST"
 		response = br.submit()
 
+		#getting the soup
 		soup = BeautifulSoup(response.get_data())
 
 		#extracting status of password changing procedure
@@ -48,4 +50,4 @@ def changePassword(reg_no = "", pwd = "", newpwd = ""):
 
 	else :
 		print "FAIL"
-		return {"status" : "Failure"}
+		return {"Status" : "Failure", "Reason" : "Wrong Captcha"}

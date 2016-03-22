@@ -1,20 +1,25 @@
 from login import login
 from bs4 import BeautifulSoup
 
-def academicHistory(reg_no = "", pwd = ""):
+def getAcademicHistory(reg_no = "", pwd = ""):
 
+	#logging in
 	br = login(reg_no,pwd)
 
-	print br.geturl()
-
+	#checking that are we logged in or not
 	if br.geturl() == ("https://academics.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
+		#opening the academic history page
 		br.open("https://academics.vit.ac.in/student/student_history.asp")
 		response = br.open("https://academics.vit.ac.in/student/student_history.asp")
+
+		#getting the soup
 		soup = BeautifulSoup(response.get_data())
 
 		tables = soup.findAll('table')
+
+		#getting the required table
 		myTable = tables[2]
 
 		rows = myTable.findChildren(['th','tr'])
@@ -65,4 +70,4 @@ def academicHistory(reg_no = "", pwd = ""):
 
 	else :
 		print "FAIL"
-		return {"status" : "Failure"}
+		return {"Status" : "Failure", "Reason" : "Wrong Captcha"}

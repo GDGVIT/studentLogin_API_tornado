@@ -1,7 +1,7 @@
 from login import login
 from bs4 import BeautifulSoup
 
-def marks15(reg_no = "", pwd = ""):
+def getMarks15(reg_no = "", pwd = ""):
 
 	br = login(reg_no,pwd)
 

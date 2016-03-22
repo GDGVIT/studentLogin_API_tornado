@@ -1,95 +1,168 @@
+#importing the required modules
 from login import login
 from bs4 import BeautifulSoup
+import threading
 
-def spotlight():
+#importing the mechanical browser
+import mechanize
 
-	import mechanize
+#initializing required variables
+acad = []
+coe = []
+research = []
 
-	br = mechanize.Browser()
-	br.set_handle_robots(False)
-	br.set_handle_equiv(True)
-	br.set_handle_gzip(True)
-	br.set_handle_redirect(True)
-	br.set_handle_referer(True)
+#spotlight class
+class Spotlight():
 
-	br.open("https://academics.vit.ac.in/include_spotlight_part01.asp")
-	response = br.open("https://academics.vit.ac.in/include_spotlight_part01.asp")
-	soup = BeautifulSoup(response.get_data())
-	
-	tables = soup.findAll('table')
+	#constructor for browser initialization
+	def __init__(self):
 
-	myTable = tables[0]
+		self.br = mechanize.Browser()
+		self.br.set_handle_robots(False)
+		self.br.set_handle_equiv(True)
+		self.br.set_handle_gzip(True)
+		self.br.set_handle_redirect(True)
+		self.br.set_handle_referer(True)
 
-	rows = myTable.findChildren(['th','tr'])
-	acad = []
+	#for getting academic spotlight
+	def acadSpotlight(self):
 
-	for row in rows:
+		#opening the academics spotlight page
+		self.br.open("https://academics.vit.ac.in/include_spotlight_part01.asp")
+		response = self.br.open("https://academics.vit.ac.in/include_spotlight_part01.asp")
 
-		text = row.find('td').string
-
-		if row.find('a') is not None:
-			link = "https://academics.vit.ac.in/"+row.find('a')['href'] 
-		else:
-			link = "No_link"
-
-		if text == None:
-			print "hi"
-		else:
-			acad.append({"text": text, "url" : link})
-
-	br.open("https://academics.vit.ac.in/include_spotlight_part02.asp")
-	response = br.open("https://academics.vit.ac.in/include_spotlight_part02.asp")
-	soup = BeautifulSoup(response.get_data())
-	
-	try:
+		#getting the soup
+		soup = BeautifulSoup(response.get_data())
+		
 		tables = soup.findAll('table')
+
+		#getting the required table
 		myTable = tables[0]
 
 		rows = myTable.findChildren(['th','tr'])
-		coe = []
+
+		#etracting the data
 		for row in rows:
 
 			text = row.find('td').string
 
 			if row.find('a') is not None:
-				link = "https://academics.vit.ac.in/"+row.find('a')['href'] 
+
+				link = "https://academics.vit.ac.in/"+row.find('a')['href']
+
 			else:
+
 				link = "No_link"
 
 			if text == None:
-				print "hi"
+
+				print "no text"
+
 			else:
-				coe.append({"text": text, "url" : link})
 
-	except IndexError:
-		myTable = 'null'
-		coe = 'no_data'
+				acad.append({"text": text, "url" : link})
 
-	br.open("https://academics.vit.ac.in/include_spotlight_part03.asp")
-	response = br.open("https://academics.vit.ac.in/include_spotlight_part03.asp")
-	soup = BeautifulSoup(response.get_data())
+	#for getting COE spotlight
+	def coeSpotlight(self):
 
-	try:
-		tables = soup.findAll('table')
-		myTable = tables[0]
+		#opening the COE soptling page
+		self.br.open("https://academics.vit.ac.in/include_spotlight_part02.asp")
+		response = self.br.open("https://academics.vit.ac.in/include_spotlight_part02.asp")
 
-		rows = myTable.findChildren(['th','tr'])
-		research = []
+		#getting the soup
+		soup = BeautifulSoup(response.get_data())
+		
+		#if tabel is present
+		try:
 
-		for row in rows:
+			tables = soup.findAll('table')
+			myTable = tables[0]
 
-			text = row.find('td').string
+			rows = myTable.findChildren(['th','tr'])
 
-			if row.find('a') is not None:
-				link = "https://academics.vit.ac.in/"+row.find('a')['href'] 
-			else:
-				link = "No_link"
+			#extracting the data
+			for row in rows:
 
-			if text != None:
-				research.append({"text": text, "url" : link})
+				text = row.find('td').string
 
-	except IndexError:
-		myTable = 'null'
-		research = 'no_data'
+				if row.find('a') is not None:
+
+					link = "https://academics.vit.ac.in/"+row.find('a')['href'] 
+
+				else:
+
+					link = "No_link"
+
+				if text == None:
+
+					print "no text"
+
+				else:
+					coe.append({"text": text, "url" : link})
+
+		#if table is absent
+		except IndexError:
+
+			myTable = None
+
+	#for getting Research spotlight
+	def researchSpotlight(self):
+
+		#opening the research spotlight
+		self.br.open("https://academics.vit.ac.in/include_spotlight_part03.asp")
+		response = self.br.open("https://academics.vit.ac.in/include_spotlight_part03.asp")
+
+		#getting the soup
+		soup = BeautifulSoup(response.get_data())
+
+		#if table is present
+		try:		
+
+			tables = soup.findAll('table')
+			myTable = tables[0]
+
+			rows = myTable.findChildren(['th','tr'])
+
+			for row in rows:
+
+				text = row.find('td').string
+
+				if row.find('a') is not None:
+
+					link = "https://academics.vit.ac.in/"+row.find('a')['href'] 
+
+				else:
+
+					link = "No_link"
+
+				if text != None:
+
+					research.append({"text": text, "url" : link})
+
+		#if table is absent
+		except IndexError:
+
+			myTable = None
+
+#function to return the scraped spotlight
+def getSpotlight():
+
+	#creating the instance of Spotlight
+	spotlight = Spotlight()
+
+	#creating the individual threads for each spotlight
+	acadThread = threading.Thread(target = spotlight.acadSpotlight())
+	coeThread = threading.Thread(target = spotlight.coeSpotlight())
+	researchThread = threading.Thread(target = spotlight.researchSpotlight())
+
+	#starting the threads
+	acadThread.start()
+	coeThread.start()
+	researchThread.start()
+
+	#waiting for the threads to complete
+	acadThread.join()
+	coeThread.join()
+	researchThread.join()
 
 	return {"status" : "Success" , "academics" : acad, "COE" : coe , "research" : research}

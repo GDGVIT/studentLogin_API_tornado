@@ -1,20 +1,23 @@
 from login import login
 from bs4 import BeautifulSoup
 
-def calmarks(reg_no = "", pwd = ""):
+def getCalmarks(reg_no = "", pwd = ""):
+
+	#logging in
 	br = login(reg_no,pwd)
 
-	print br.geturl()
-
 	#checking that are we logged in or not
-
 	if br.geturl() == ("https://academics.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
+		#opening the cal marks page
 		br.open("https://academics.vit.ac.in/student/cal_da.asp?sem=FS")
 		response = br.open("https://academics.vit.ac.in/student/cal_da.asp?sem=FS")
 
+		#getting the soup
 		soup = BeautifulSoup(response.get_data())
+
+		#getting the required table
 		myTable = soup.findAll('table')[1]
 
 		rows = myTable.findChildren(['th','tr'])
@@ -23,6 +26,7 @@ def calmarks(reg_no = "", pwd = ""):
 		calmarks = {}
 		i = 0
 
+		#extracting the table
 		for row in rows:
 
 			details = []
@@ -35,6 +39,7 @@ def calmarks(reg_no = "", pwd = ""):
 			dsoup = BeautifulSoup(r.get_data())
 			dtables = dsoup.findChildren('table')
 
+			#if table is present
 			try:
 				dmyTable = dtables[2]
 				drows = dmyTable.findChildren(['th','tr'])
@@ -59,6 +64,7 @@ def calmarks(reg_no = "", pwd = ""):
 					elif cells[4].getText().replace("\r\n\t\t","") == "Embedded Project":
 						calmarks[cells[2].getText().replace("\r\n\t\t","")+"P"] = {"course_type" : cells[4].getText().replace("\r\n\t\t",""), "faculty" : cells[5].getText().replace("\r\n\t\t",""), "details" : details}
 
+			#if table is absent
 			except:
 
 				br.open("https://academics.vit.ac.in/student/cal_da.asp?sem=FS")
@@ -78,4 +84,4 @@ def calmarks(reg_no = "", pwd = ""):
 
 	else :
 		print "FAIL"
-		return {"status" : "Failure"}
+		return {"Status" : "Failure", "Reason" : "Wrong Captcha"}
