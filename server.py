@@ -118,7 +118,8 @@ class ChangePasswordHandler(tornado.web.RequestHandler):
 	def post(self):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
-		self.write(dict(status = changePassword(regno, psswd)))
+		npsswd = self.get_argument("npsswd")
+		self.write(dict(status = changePassword(regno, psswd, npsswd)))
 
 #for getting the messages details
 class MessageHandler(tornado.web.RequestHandler):

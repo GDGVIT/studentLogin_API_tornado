@@ -1,6 +1,7 @@
 from login import login
 from bs4 import BeautifulSoup
 
+#for changing the  password
 def changePassword(reg_no = "", pwd = "", newpwd = ""):
 
 	#logging in
