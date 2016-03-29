@@ -9,7 +9,6 @@ attendance = {}
 details = []
 threadLock = threading.Lock()
 threads = []
-dthreads = []
 
 #getting today's date
 tz = pytz.timezone('Asia/Kolkata')
@@ -31,18 +30,6 @@ class myThread(threading.Thread):
 		scrape(self.br, self.row, self.i)
 		threadLock.release()
 
-class deThread(threading.Thread):
-
-	def __init__(self,row):
-		threading.Thread.__init__(self)
-		self.row = row
-
-	def run(self):
-
-		threadLock.acquire()
-		detscrape(self.row)
-		threadLock.release()
-
 def scrape(br, row, i):
 
 	cells = row.findChildren('td')
@@ -56,12 +43,8 @@ def scrape(br, row, i):
 	else:
 		attendance[cells[1].getText().replace("\r\n\t\t","")+"_L"] = {"registration_date" : cells[5].getText().replace("\r\n\t\t",""), "attended_classes" : cells[6].getText().replace("\r\n\t\t",""), "total_classes" : cells[7].getText().replace("\r\n\t\t",""), "attendance_percentage" : cells[8].getText().replace("\r\n\t\t",""), "details" : detail}
 
-def detscrape(drow):
-
-	dcells = drow.findChildren('td')
-	details.append({"date" : dcells[1].getText(), "slot" : dcells[2].getText(), "status" : dcells[3].getText(), "class_units" : dcells[4].getText(), "reason" : dcells[5].getText()})
-
 def details(br):
+
 	details = []
 	r = br.submit()
 	dsoup = BeautifulSoup(r.get_data())
@@ -75,25 +58,14 @@ def details(br):
 
 		for drow in drows:
 
-			#creating thread for each row
-			thrd = deThread(drow)
-			#starting the thread
-			thrd.start()
-
-			#appending into thread list
-			dthreads.append(thrd)
-
-		print "done1"
-		#waiting for each thread to complete
-		for t in dthreads:
-			t.join()
-
-		print "done2"
+			dcells = drow.findChildren('td')
+			details.append({"date" : dcells[1].getText(), "slot" : dcells[2].getText(), "status" : dcells[3].getText(), "class_units" : dcells[4].getText(), "reason" : dcells[5].getText()})
 
 	except:
-		details = []
+		print "No_table"
 
 	br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
+	
 	return details
 
 def getAttendance(reg_no = "", pwd = ""):
@@ -106,10 +78,6 @@ def getAttendance(reg_no = "", pwd = ""):
 		print "SUCCESS"
 
 		#opening the attendance page
-		br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS")
-		response = br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS")
-		soup = BeautifulSoup(response.get_data())
-
 		br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
 		response = br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
 		soup = BeautifulSoup(response.get_data())
@@ -132,8 +100,9 @@ def getAttendance(reg_no = "", pwd = ""):
 			#appending into thread list
 			threads.append(thrd)
 
-			i = i+1
+			i = i+1 
 		
+		#waiting for each thread to end
 		for t in threads:
 			t.join()
 

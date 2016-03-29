@@ -4,57 +4,68 @@ import datetime, pytz
 import threading
 
 #initialising some required variables
-attendance = {}
-marks = {}
-time_table = {}
-examSchedule = {}
-academicHistory = {}
-faculty_advisor = {}
-messages = []
 threadLock = threading.Lock()
 threads = []
+months = {1:"Jan", 2:"Feb", 3:"Mar", 4:"Apr", 5:"May", 6:"Jun", 7:"Jul", 8:"Aug", 9:"Sep", 10:"Oct", 11:"Nov", 12:"Dec"}
+
+#getting today's date
+tz = pytz.timezone('Asia/Kolkata')
+now = datetime.datetime.now(tz)
+today = str(now.day) + "-" + months[now.month] + "-" + str(now.year)
 
 #overloading thread init and run function
 class myThread(threading.Thread):
 
 	#overloading the __init__ function
-	def __init__(self, row, status):
+	def __init__(self, row, status, reqvar, *args):
 		threading.Thread.__init__(self)
+
 		self.row = row
 		self.status = status
+		self.reqvar = reqvar
+
+		#for attendance and cal
+		if self.status in [2,8]: 
+			self.i = args[0]
+			self.br = args[1]
+
+		#for academic history
+		elif self.status > 70 and self.status < 80:
+			self.astat = args[0]
 
 	#overloading the run function
 	def run(self):
 		
 		threadLock.acquire()
+
 		if self.status == 1:
-			timeScrape(self.row)
+			timeScrape(self.row, self.reqvar)
 
 		elif self.status == 2:
-			msgScrape(self.row)
+			attenScrape(self.row, self.br, self.i, self.reqvar)
 
 		elif self.status == 3:
-			mark14Scrape(self.row)
+			mark14Scrape(self.row, self.reqvar)
 
 		elif self.status == 4:
-			mark15Scrape(self.row)
+			mark15Scrape(self.row, self.reqvar)
 
 		elif self.status == 5:
-			msgScrape(self.row)
+			facScrape(self.row, self.reqvar)
 
 		elif self.status == 6:
-			msgScrape(self.row)
+			msgScrape(self.row, self.reqvar)
 
-		elif self.status == 7:
-			facScrape(self.row)
+		elif self.status > 70 and self.status < 80:
+			acadScrape(self.row, self.reqvar, self.astat)
 
 		elif self.status == 8:
-			msgScrape(self.row)
+			calScrape(self.br, self.row, self.i, self.reqvar)
 
 		threadLock.release()
 
 #fuction to scrape the row data of timetable
-def timeScrape(row):
+def timeScrape(row, time_table):
 
 	cells = row.findAll('td')
 
@@ -83,8 +94,48 @@ def timeScrape(row):
 
 			time_table[cells[3].getText().replace("\r\n\t\t","")] = dict({("class_number",cells[2].getText().replace("\r\n\t\t","")), ("course_code",cells[3].getText().replace("\r\n\t\t","")), ("course_title",cells[4].getText().replace("\r\n\t\t","")), ("course_type",cells[5].getText().replace("\r\n\t\t","")), ("ltpjc",cells[6].getText().replace("\n\r\n\t\t\t\t","").replace("\r\n\t\t\t\t\n","")), ("course_mode",cells[7].getText().replace("\r\n\t\t","")), ("course_option",cells[8].getText().replace("\r\n\t\t","")), ("slot",cells[9].getText().replace("\r\n\t\t","")), ("venue",cells[10].getText().replace("\r\n\t\t","")), ("faculty",cells[11].getText().replace("\r\n\t\t","")), ("registration_status",cells[12].getText().replace("\r\n\t\t",""))})
 
+#function to get details of each page
+def details(br):
+
+	details = []
+	r = br.submit()
+	dsoup = BeautifulSoup(r.get_data())
+	dtables = dsoup.findChildren('table')
+
+	try:
+		dmyTable = dtables[2]
+		drows = dmyTable.findChildren(['th','tr'])
+		drows = drows[2:]
+
+
+		for drow in drows:
+
+			dcells = drow.findChildren('td')
+			details.append({"date" : dcells[1].getText(), "slot" : dcells[2].getText(), "status" : dcells[3].getText(), "class_units" : dcells[4].getText(), "reason" : dcells[5].getText()})
+
+	except:
+		print "No_table"
+
+	br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
+	
+	return details
+
+#fuction to scrape the row data of timetable
+def attenScrape(row, br, i, attendance):
+
+	cells = row.findChildren('td')
+
+	br.select_form(nr=i)
+
+	detail = details(br)
+
+	if cells[1].getText().replace("\r\n\t\t","") not in attendance.keys():
+		attendance[cells[1].getText().replace("\r\n\t\t","")] = {"registration_date" : cells[5].getText().replace("\r\n\t\t",""), "attended_classes" : cells[6].getText().replace("\r\n\t\t",""), "total_classes" : cells[7].getText().replace("\r\n\t\t",""), "attendance_percentage" : cells[8].getText().replace("\r\n\t\t",""), "details" : detail}
+	else:
+		attendance[cells[1].getText().replace("\r\n\t\t","")+"_L"] = {"registration_date" : cells[5].getText().replace("\r\n\t\t",""), "attended_classes" : cells[6].getText().replace("\r\n\t\t",""), "total_classes" : cells[7].getText().replace("\r\n\t\t",""), "attendance_percentage" : cells[8].getText().replace("\r\n\t\t",""), "details" : detail}
+
 #fuction to scrape the row data of marks
-def mark14scrape(row):
+def mark14scrape(row, marks):
 
 	rowdata = []
 	assessments = []
@@ -131,7 +182,7 @@ def mark14scrape(row):
 			marks[rowdata[2]] = {"assessments" : assessments, "max_marks" : 100, "max_percentage" : 100, "scored_marks" : float(rowdata[7]), "scored_percentage" : (float(rowdata[7]))}
 
 #fuction to scrape the row data of marks
-def mark15scrape(row):
+def mark15scrape(row, marks):
 
 	rowdata = []
 	assessments = []
@@ -156,7 +207,7 @@ def mark15scrape(row):
 		marks[rowdata[2].replace("\r\n\t\t","")] = {"assessments" : assessments, "max_marks" : 130, "max_percentage" : 50, "scored_marks" : (float(rowdata[6])+float(rowdata[8])+float(rowdata[9])), "scored_percentage" : ((((float(rowdata[6]))/50)*10)+(((float(rowdata[8]))/50)*10)+(float(rowdata[9])))}
 
 #fuction to scrape the row data of faculty advisor
-def facScrape(row):
+def facScrape(row, faculty_advisor):
 
 	cells = row.findChildren('td')
 
@@ -169,12 +220,94 @@ def facScrape(row):
 		faculty_advisor[cells[0].string.replace("\r\n\t\t","")] = cells[1].string.replace("\r\n\t\t","")
 
 #fuction to scrape the row data of messages
-def msgScrape(row):
+def msgScrape(row, messages):
 
 	cells = row.findChildren('td')
 				
 	messages.append({"From" : cells[0].string.replace("\r\n\t\t",""), "Course" : cells[1].string.replace("\r\n\t\t",""), "Message" : cells[2].string.replace("\r\n\t\t","").replace("\r\n"," "), "Posted on" : cells[3].string.replace("\r\n\t\t","")})
 
+#fuction to scrape the row data of academic history
+def acadScrape(row, academicHistory, status):
+
+	if status == 71:
+		cells = row.findChildren('td')
+		cells = cells[1:6]
+
+		if cells[2].string.replace("\r\n\t\t","")[0:2] == "ET" or cells[2].string.replace("\r\n\t\t","")[0:2] == "EL" or cells[2].string.replace("\r\n\t\t","")[0:2] == "EP":
+			academicHistory["history1"].append(dict({("course_code" , cells[0].string.replace("\r\n\t\t","")) , ("course_title" , cells[1].string.replace("\r\n\t\t","")) , ("course_type" , cells[2].string.replace("\r\n\t\t","")) , ("credit" , "NA") , ("grade" , "NA")}))
+
+		else:
+			academicHistory["history1"].append(dict({("course_title" , cells[1].string.replace("\r\n\t\t","")) , ("course_type" , cells[2].string.replace("\r\n\t\t","")) , ("credit" , cells[3].string) , ("grade" , cells[4].string)}))
+
+	elif status == 72:
+		cells = row.findChildren('td')
+
+		academicHistory["history2"].append(dict({("credits registered" , cells[0].string.replace("\r\n\t\t","")) , ("credits earned" , cells[1].string.replace("\r\n\t\t","")) , ("cgpa" , cells[2].string.replace("\r\n\t\t","")) , ("rank" , cells[3].string.replace("\r\n\t\t",""))}))
+
+	else:
+		cells = row.findChildren('td')
+
+		academicHistory["grdSumm"].append(dict({("S grades" , cells[0].string.replace("\r\n\t\t","")) , ("A grades" , cells[1].string.replace("\r\n\t\t","")) , ("B grades" , cells[2].string.replace("\r\n\t\t","")) , ("C grades" , cells[3].string.replace("\r\n\t\t","")) , ("D grades" , cells[4].string.replace("\r\n\t\t","")) , ("E grades" , cells[5].string.replace("\r\n\t\t","")) , ("F grades" , cells[6].string.replace("\r\n\t\t","")) , ("N grades" , cells[7].string.replace("\r\n\t\t",""))}))
+
+#fuction to scrape the row data of cal marks
+def calSscrape(br, row, i, calmarks):
+
+	details = []
+	cells = row.findChildren('td')
+
+	br.select_form(nr=i)
+	i = i+1
+
+	r = br.submit()
+	dsoup = BeautifulSoup(r.get_data())
+	dtables = dsoup.findChildren('table')
+
+	#if table is present
+	try:
+		dmyTable = dtables[2]
+		
+	#if table is absent
+	except:
+
+		br.open("https://academics.vit.ac.in/student/cal_da.asp?sem=WS")
+
+		if cells[2].getText().replace("\r\n\t\t","") not in calmarks.keys():
+
+			calmarks[cells[2].getText().replace("\r\n\t\t","")] = {"course_type" : cells[4].getText().replace("\r\n\t\t",""), "faculty" : cells[5].getText().replace("\r\n\t\t",""), "details" : details}
+
+		else:
+			if cells[4].getText().replace("\r\n\t\t","") == "Embedded Lab":
+				calmarks[cells[2].getText().replace("\r\n\t\t","")+"L"] = {"course_type" : cells[4].getText().replace("\r\n\t\t",""), "faculty" : cells[5].getText().replace("\r\n\t\t",""), "details" : details}
+
+			elif cells[4].getText().replace("\r\n\t\t","") == "Embedded Project":
+				calmarks[cells[2].getText().replace("\r\n\t\t","")+"P"] = {"course_type" : cells[4].getText().replace("\r\n\t\t",""), "faculty" : cells[5].getText().replace("\r\n\t\t",""), "details" : details}
+
+	else:
+
+		drows = dmyTable.findChildren(['th','tr'])
+		drows = drows[2:-1]
+
+		for drow in drows:
+
+			dcells = drow.findAll('td')
+			details.append({"assignment_title" : dcells[1].getText(), "due_date" : dcells[2].getText(),"max_marks" : dcells[3].getText() ,"assignment_status" : dcells[5].getText() if dcells[5].getText() else "NA", "marks_status" : dcells[7].getText() if dcells[7].getText() else "NA", "marks_score" : dcells[8].getText() if dcells[3].getText() else "NA"})
+
+		br.open("https://academics.vit.ac.in/student/cal_da.asp?sem=WS")
+
+		if cells[2].getText().replace("\r\n\t\t","") not in calmarks.keys():
+
+			calmarks[cells[2].getText().replace("\r\n\t\t","")] = {"course_type" : cells[4].getText().replace("\r\n\t\t",""), "faculty" : cells[5].getText().replace("\r\n\t\t",""), "details" : details}
+
+		else:
+			if cells[4].getText().replace("\r\n\t\t","") == "Embedded Lab":
+				calmarks[cells[2].getText().replace("\r\n\t\t","")+"L"] = {"course_type" : cells[4].getText().replace("\r\n\t\t",""), "faculty" : cells[5].getText().replace("\r\n\t\t",""), "details" : details}
+
+			elif cells[4].getText().replace("\r\n\t\t","") == "Embedded Project":
+				calmarks[cells[2].getText().replace("\r\n\t\t","")+"P"] = {"course_type" : cells[4].getText().replace("\r\n\t\t",""), "faculty" : cells[5].getText().replace("\r\n\t\t",""), "details" : details}
+
+	return calmarks
+
+#function to call every function for refresh module
 class Refresh():
 
 	def __init__(self, reg_no, pswd):
@@ -189,6 +322,7 @@ class Refresh():
 		else :
 			print "FAIL"
 
+	#function to get the timetable
 	def getTimetable(self):
 
 		#opening time table page
@@ -201,6 +335,9 @@ class Refresh():
 		#extracting tables from soup
 		tables = soup.findAll('table')
 
+		#initializing required variables
+		time_table = {}
+
 		#getting required table
 		myTable = tables[1]
 		rows = myTable.findChildren(['th','tr'])
@@ -211,7 +348,7 @@ class Refresh():
 		for row in rows:
 
 			#creating thread for each row
-			thrd = myThread(row, 1)
+			thrd = myThread(row, 1, time_table)
 			#starting the thread
 			thrd.start()
 
@@ -225,20 +362,12 @@ class Refresh():
 		#returning the attendance
 		return time_table
 
+	#function to get the attendance
 	def getAttendance(self):
 
-		months = {1:"Jan", 2:"Feb", 3:"Mar", 4:"Apr", 5:"May", 6:"Jun", 7:"Jul", 8:"Aug", 9:"Sep", 10:"Oct", 11:"Nov", 12:"Dec"}
-
-		#getting today's date
-		tz = pytz.timezone('Asia/Kolkata')
-		now = datetime.datetime.now(tz)
-		today = str(now.day) + "-" + months[now.month] + "-" + str(now.year)
-
 		#opening the attendance page
-		self.br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
-		response = self.br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
-
-		#getting the soup
+		br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
+		response = br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
 		soup = BeautifulSoup(response.get_data())
 
 		#extracting tables
@@ -248,47 +377,29 @@ class Refresh():
 		rows = rows[1:]
 		i = 1
 
+		#initializing required variables
+		attendance = {}
+
 		#extracting data
 		for row in rows:
 
-			details = []
-			cells = row.findChildren('td')
+			#creating thread for each row
+			thrd = myThread(row, 2, attendance)
+			#starting the thread
+			thrd.start()
 
-			self.br.select_form(nr=i)
-			i = i+1
+			#appending into thread list
+			threads.append(thrd)
 
-			r = self.br.submit()
-			dsoup = BeautifulSoup(r.get_data())
-			dtables = dsoup.findChildren('table')
-
-			try:
-				dmyTable = dtables[2]
-				drows = dmyTable.findChildren(['th','tr'])
-				drows = drows[2:]
-
-
-				for drow in drows:
-
-					dcells = drow.findChildren('td')
-
-					details.append({"date" : dcells[1].getText(), "slot" : dcells[2].getText(), "status" : dcells[3].getText(), "class_units" : dcells[4].getText(), "reason" : dcells[5].getText()})
-
-				self.br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
-
-				if cells[1].getText().replace("\r\n\t\t","") not in attendance.keys():
-					attendance[cells[1].getText().replace("\r\n\t\t","")] = {"registration_date" : cells[5].getText().replace("\r\n\t\t",""), "attended_classes" : cells[6].getText().replace("\r\n\t\t",""), "total_classes" : cells[7].getText().replace("\r\n\t\t",""), "attendance_percentage" : cells[8].getText().replace("\r\n\t\t",""), "details" : details}
-				else:
-					attendance[cells[1].getText().replace("\r\n\t\t","")+"_L"] = {"registration_date" : cells[5].getText().replace("\r\n\t\t",""), "attended_classes" : cells[6].getText().replace("\r\n\t\t",""), "total_classes" : cells[7].getText().replace("\r\n\t\t",""), "attendance_percentage" : cells[8].getText().replace("\r\n\t\t",""), "details" : details}
-
-			except:
-				self.br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
-				if cells[1].getText().replace("\r\n\t\t","") not in attendance.keys():
-					attendance[cells[1].getText().replace("\r\n\t\t","")] = {"registration_date" : cells[5].getText().replace("\r\n\t\t",""), "attended_classes" : cells[6].getText().replace("\r\n\t\t",""), "total_classes" : cells[7].getText().replace("\r\n\t\t",""), "attendance_percentage" : cells[8].getText().replace("\r\n\t\t",""), "details" : {}}
-				else:
-					attendance[cells[1].getText().replace("\r\n\t\t","")+"_L"] = {"registration_date" : cells[5].getText().replace("\r\n\t\t",""), "attended_classes" : cells[6].getText().replace("\r\n\t\t",""), "total_classes" : cells[7].getText().replace("\r\n\t\t",""), "attendance_percentage" : cells[8].getText().replace("\r\n\t\t",""), "details" : {}}
+			i = i+1 
+		
+		#waiting for each thread to end
+		for t in threads:
+			t.join()
 
 		return attendance
 
+	#function to get the marks
 	def getMarks14(self):
 
 		#opening marks page
@@ -302,6 +413,9 @@ class Refresh():
 		tables = soup.findAll('table')
 		myTable = tables[1]
 
+		#initializing required variables
+		marks = {}
+
 		#initialising some required variables
 		rows = myTable.findChildren(['th','tr'])
 		rows = rows[2:]
@@ -310,7 +424,7 @@ class Refresh():
 		for row in rows:
 
 			#creating thread for each row
-			thrd = myThread(row,3)
+			thrd = myThread(row, 3, marks)
 			#starting the thread
 			thrd.start()
 
@@ -381,6 +495,7 @@ class Refresh():
 		#returning the marks
 		return marks
 
+	#function to get the marks
 	def getMarks15(self):
 
 		#opening marks page
@@ -398,11 +513,14 @@ class Refresh():
 		rows = myTable.findChildren(['th','tr'])
 		rows = rows[2:]
 
+		#initializing required variables
+		marks = {}
+
 		#extracting data
 		for row in rows:
 
 			#creating thread for each row
-			thrd = myThread(row, 4)
+			thrd = myThread(row, 4, marks)
 			#starting the thread
 			thrd.start()
 
@@ -416,6 +534,7 @@ class Refresh():
 		#returning marks
 		return marks
 
+	#function to get the exam schedule
 	def getExamschedule(self):
 
 		#inmporting Queue
@@ -492,72 +611,7 @@ class Refresh():
 
 		return examSchedule
 
-	def getAcademicHistory(self):
-
-		#opening the academic history page
-		self.br.open("https://academics.vit.ac.in/student/student_history.asp")
-		response = self.br.open("https://academics.vit.ac.in/student/student_history.asp")
-
-		#getting the soup
-		soup = BeautifulSoup(response.get_data())
-
-		tables = soup.findAll('table')
-
-		#getting the required table
-		myTable = tables[2]
-
-		rows = myTable.findChildren(['th','tr'])
-		rows = rows[1:]
-
-		#initialising some required variables
-		history1 = []
-
-		#extracting data
-		for row in rows:
-
-			cells = row.findChildren('td')
-			cells = cells[1:6]
-
-			if cells[2].string.replace("\r\n\t\t","")[0:2] == "ET" or cells[2].string.replace("\r\n\t\t","")[0:2] == "EL" or cells[2].string.replace("\r\n\t\t","")[0:2] == "EP":
-				history1.append(dict({("course_code" , cells[0].string.replace("\r\n\t\t","")) , ("course_title" , cells[1].string.replace("\r\n\t\t","")) , ("course_type" , cells[2].string.replace("\r\n\t\t","")) , ("credit" , "NA") , ("grade" , "NA")}))
-
-			else:
-				history1.append(dict({("course_title" , cells[1].string.replace("\r\n\t\t","")) , ("course_type" , cells[2].string.replace("\r\n\t\t","")) , ("credit" , cells[3].string) , ("grade" , cells[4].string)}))
-
-		myTable = tables[3]
-
-		rows = myTable.findChildren(['th','tr'])
-		rows = rows[1:]
-
-		#initialising some required variables
-		history2 = []
-
-		#extracting data
-		for row in rows:
-
-			cells = row.findChildren('td')
-
-			history2.append(dict({("credits registered" , cells[0].string.replace("\r\n\t\t","")) , ("credits earned" , cells[1].string.replace("\r\n\t\t","")) , ("cgpa" , cells[2].string.replace("\r\n\t\t","")) , ("rank" , cells[3].string.replace("\r\n\t\t",""))}))
-
-		myTable = tables[4]
-
-		rows = myTable.findChildren(['th','tr'])
-		rows = rows[1:]
-
-		#initialising some required variables
-		grdSumm = []
-
-		#extracting data
-		for row in rows:
-
-			cells = row.findChildren('td')
-
-			grdSumm.append(dict({("S grades" , cells[0].string.replace("\r\n\t\t","")) , ("A grades" , cells[1].string.replace("\r\n\t\t","")) , ("B grades" , cells[2].string.replace("\r\n\t\t","")) , ("C grades" , cells[3].string.replace("\r\n\t\t","")) , ("D grades" , cells[4].string.replace("\r\n\t\t","")) , ("E grades" , cells[5].string.replace("\r\n\t\t","")) , ("F grades" , cells[6].string.replace("\r\n\t\t","")) , ("N grades" , cells[7].string.replace("\r\n\t\t",""))}))
-
-		academicHistory = {"history 1" : history1 , "history 2" : history2 , "grade summary" : grdSumm}
-
-		return academicHistory
-
+	#function to get the faculty advisor datails
 	def getFacultyAdvisor(self):
 
 		#opening faculty advisor details page
@@ -566,6 +620,9 @@ class Refresh():
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())
+
+		#initializing required variables
+		faculty_advisor = {}
 
 		#extracting tables
 		tables = soup.findChildren('table')
@@ -576,7 +633,7 @@ class Refresh():
 		for row in rows:
 
 			#creating thread for each row
-			thrd = myThread(row, 7)
+			thrd = myThread(row, 7, faculty_advisor)
 			#starting the thread
 			thrd.start()
 
@@ -590,6 +647,7 @@ class Refresh():
 		#returning faculty_advisor
 		return faculty_advisor
 
+	#function to get the messages
 	def getMessages(self):
 
 		#opening the meesages page
@@ -598,6 +656,9 @@ class Refresh():
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())
+
+		#initializing some required variables
+		messages = []
 
 		#checking if there is a mesage or not
 		try:
@@ -611,7 +672,7 @@ class Refresh():
 			for row in rows[:-1]:
 
 				#creating thread for each row
-				thrd = myThread(row, 8)
+				thrd = myThread(row, 8, messages)
 				#starting the thread
 				thrd.start()
 
@@ -630,7 +691,118 @@ class Refresh():
 		#returning messages
 		return messages
 
+	#function to get the academic history
+	def getAcademicHistory(self):
 
+		#opening the academic history page
+		br.open("https://academics.vit.ac.in/student/student_history.asp")
+		response = br.open("https://academics.vit.ac.in/student/student_history.asp")
+
+		#getting the soup
+		soup = BeautifulSoup(response.get_data())
+
+		tables = soup.findAll('table')
+
+		#getting the required table
+		myTable = tables[2]
+
+		#initiazing required variables
+		academicHistory = {"history1" : [], "history2" : [], "grdSumm" : []}
+
+		rows = myTable.findChildren(['th','tr'])
+		rows = rows[1:]
+
+		#extracting data
+		for row in rows:
+
+			#creating thread for each row
+			thrd = myThread(row,71, academicHistory)
+			#starting the thread
+			thrd.start()
+
+			#appending into thread list
+			threads.append(thrd)
+
+		myTable = tables[3]
+
+		rows = myTable.findChildren(['th','tr'])
+		rows = rows[1:]
+
+		#extracting data
+		for row in rows:
+
+			#creating thread for each row
+			thrd = myThread(row,72, academicHistory)
+			#starting the thread
+			thrd.start()
+
+			#appending into thread list
+			threads.append(thrd)
+
+		myTable = tables[4]
+
+		rows = myTable.findChildren(['th','tr'])
+		rows = rows[1:]
+
+		#extracting data
+		for row in rows:
+
+			#creating thread for each row
+			thrd = myThread(row,73, academicHistory)
+			#starting the thread
+			thrd.start()
+
+			#appending into thread list
+			threads.append(thrd)
+
+		#waiting for each thread to complete
+		for t in threads:
+			t.join()
+
+		return academicHistory
+
+	#function to get the cal marks
+	def getCalMarks(self):
+
+		#opening the cal marks page
+		br.open("https://academics.vit.ac.in/student/cal_da.asp?sem=WS")
+		response = br.open("https://academics.vit.ac.in/student/cal_da.asp?sem=WS")
+
+		#getting the soup
+		soup = BeautifulSoup(response.get_data())
+
+		#getting the required table
+		myTable = soup.findAll('table')[1]
+
+		#initialising some required variables
+		calmarks = {}
+
+		rows = myTable.findChildren(['th','tr'])
+		rows = rows[1:]
+
+		calmarks = {}
+		i = 0
+
+		#extracting the table
+		for row in rows:
+
+			#creating thread for each row
+			thrd = myThread(br, row, i, calmarks)
+
+			i= i+1
+			#starting the thread
+			thrd.start()
+
+			#appending into thread list
+			threads.append(thrd)
+
+		#waiting for each thread to complete
+		for t in threads:
+			t.join()
+
+		return calmarks
+
+#function to join every module into a json
 def refresh(reg_no = "", pswd = ""):
 
 	refrsh = Refresh(reg_no, pswd)
@@ -647,6 +819,7 @@ def refresh(reg_no = "", pswd = ""):
 	facultyadvisorThread = threading.Thread(target = refrsh.getFacultyAdvisor())
 	academichistoryThread = threading.Thread(target = refrsh.getAcademicHistory())
 	messagesThread = threading.Thread(target = refrsh.getMessages())
+	calThread = threading.Thread(target = refrsh.getCalMarks())
 
 
 	#starting the threads
@@ -657,6 +830,7 @@ def refresh(reg_no = "", pswd = ""):
 	facultyadvisorThread.start()
 	academichistoryThread.start()
 	messagesThread.start()
+	calThread.start()
 
 	#waiting for the threads to complete
 	marksThread.join()
@@ -666,6 +840,7 @@ def refresh(reg_no = "", pswd = ""):
 	facultyadvisorThread.join()
 	academichistoryThread.join()
 	messagesThread.join()
+	calThread.join()
 
 	#combining timetable attendance and marks as per their course code
 	mkeys = marks.keys()
@@ -698,4 +873,4 @@ def refresh(reg_no = "", pswd = ""):
 
 		i = i+1
 
-	return {"reg_no" : reg_no, "campus" : "vellore", "semester" : "WS", "courses" : data, "exam_schedule" : examSchedule, "faculty_advisor" : faculty_advisor, "academic_history" : academicHistory, "messages" : messages}
+	return {"reg_no" : reg_no, "campus" : "vellore", "semester" : "WS", "courses" : data, "exam_schedule" : examSchedule, "CAL_marks" : , "faculty_advisor" : faculty_advisor, "academic_history" : academicHistory, "messages" : messages}
