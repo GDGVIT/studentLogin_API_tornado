@@ -95,6 +95,7 @@ def getCalmarks(reg_no = "", pwd = ""):
 		soup = BeautifulSoup(response.get_data())
 
 		#getting the required table
+		print len(soup.findAll(table))
 		myTable = soup.findAll('table')[1]
 
 		#initialising some required variables

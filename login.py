@@ -5,7 +5,7 @@ def login(reg_no="",pwd=""):
 	from CaptchaParser import CaptchaParser
 	from PIL import Image
 	import mechanize
-
+	import os
 
     #handeling browser and browser initialisation
 	br = mechanize.Browser()
@@ -38,6 +38,8 @@ def login(reg_no="",pwd=""):
 	parser = CaptchaParser()
 	captcha = parser.getCaptcha(img)
 	print str(captcha)
+
+	os.remove(reg_no+".bmp")
 
 	#filling form
 	br["regno"] = str(reg_no)

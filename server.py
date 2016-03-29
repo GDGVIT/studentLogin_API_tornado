@@ -21,7 +21,7 @@ from changePassword import changePassword
 from messages import getMessages
 from marks14 import getMarks14
 from marks15 import getMarks15
-from majorRoute import refresh
+from refresh import refresh
 
 #importing the mechanical borwser
 from mechanize import Browser
@@ -67,7 +67,7 @@ class TimetableHandler(tornado.web.RequestHandler):
 	def post(self):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
-		self.write(dict(Timetable = getTimetable(regno, psswd)))
+		self.write(getTimetable(regno, psswd))
 
 #for getting the attendance details
 class AttendanceHandler(tornado.web.RequestHandler):
@@ -76,7 +76,7 @@ class AttendanceHandler(tornado.web.RequestHandler):
 	def post(self):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
-		self.write(dict(Attendance = getAttendance(regno, psswd)))
+		self.write(getAttendance(regno, psswd))
 
 #for getting the exam schedule details
 class ExamScheduleHandler(tornado.web.RequestHandler):
@@ -85,7 +85,7 @@ class ExamScheduleHandler(tornado.web.RequestHandler):
 	def post(self):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
-		self.write(dict(Exam_Schedule = getExamSchedule(regno, psswd)))
+		self.write(getExamSchedule(regno, psswd))
 
 #for getting the marks details
 class MarksHandler(tornado.web.RequestHandler):
@@ -95,9 +95,9 @@ class MarksHandler(tornado.web.RequestHandler):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
 		if int(regno[0:2]) > 14:
-			self.write(dict(Marks = getMarks15(regno, psswd)))
+			self.write(getMarks15(regno, psswd))
 		else:
-			self.write(dict(Marks = getMarks14(regno, psswd)))
+			self.write(getMarks14(regno, psswd))
 
 #for getting the CAL marks details
 class CALHandler(tornado.web.RequestHandler):
@@ -107,7 +107,7 @@ class CALHandler(tornado.web.RequestHandler):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
 		if int(regno[0:2]) > 14:
-			self.write(dict(CAL_marks = getCalmarks(regno, psswd)))
+			self.write(getCalmarks(regno, psswd))
 		else:
 			self.write(dict(status = "Not Supported"))
 
@@ -115,7 +115,7 @@ class CALHandler(tornado.web.RequestHandler):
 class SpotlightHandler(tornado.web.RequestHandler):
 
 	def post(self):
-		self.write(dict(Spotlight = getSpotlight()))
+		self.write(getSpotlight())
 
 #for getting the Academic History details
 class AcademicHistoryHandler(tornado.web.RequestHandler):
@@ -124,7 +124,7 @@ class AcademicHistoryHandler(tornado.web.RequestHandler):
 	def post(self):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
-		self.write(dict(Academic_History = getAcademicHistory(regno, psswd)))
+		self.write(getAcademicHistory(regno, psswd))
 
 #for getting the statuss for changing password
 class ChangePasswordHandler(tornado.web.RequestHandler):
@@ -133,7 +133,7 @@ class ChangePasswordHandler(tornado.web.RequestHandler):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
 		npsswd = self.get_argument("npsswd")
-		self.write(dict(Status = changePassword(regno, psswd, npsswd)))
+		self.write(changePassword(regno, psswd, npsswd))
 
 #for getting the messages details
 class MessageHandler(tornado.web.RequestHandler):
@@ -142,7 +142,7 @@ class MessageHandler(tornado.web.RequestHandler):
 	def post(self):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
-		self.write(dict(Message = getMessages(regno, psswd)))
+		self.write(getMessages(regno, psswd))
 
 #for getting all the data
 class RefreshHandler(tornado.web.RequestHandler):
@@ -151,7 +151,7 @@ class RefreshHandler(tornado.web.RequestHandler):
 	def post(self):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
-		self.write(dict(Data = refresh(regno, psswd)))
+		self.write(refresh(regno, psswd))
 
 #main fuction to start the API
 if __name__ == "__main__":
