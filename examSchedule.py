@@ -1,6 +1,7 @@
 from login import login
 from bs4 import BeautifulSoup
 
+#to get the exam schedule
 def getExamSchedule(reg_no = "", pwd = ""):
 
 	#loging in
@@ -64,15 +65,15 @@ def getExamSchedule(reg_no = "", pwd = ""):
 					schedule = {}
 					continue
 
-			examSchedule["cal1"] = p.get()
+			examSchedule["cat1"] = p.get()
 
 			if p.empty():
 
-				examSchedule["cal2"] = {}
+				examSchedule["cat2"] = {}
 
 			else:
 
-				examSchedule["cal2"] = p.get()
+				examSchedule["cat2"] = p.get()
 
 			if p.empty():
 

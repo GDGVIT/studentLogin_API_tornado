@@ -11,6 +11,169 @@ examSchedule = {}
 academicHistory = {}
 faculty_advisor = {}
 messages = []
+threadLock = threading.Lock()
+threads = []
+
+#overloading thread init and run function
+class myThread(threading.Thread):
+
+	#overloading the __init__ function
+	def __init__(self, row, status):
+		threading.Thread.__init__(self)
+		self.row = row
+		self.status = status
+
+	#overloading the run function
+	def run(self):
+		
+		threadLock.acquire()
+		if self.status == 1:
+			timeScrape(self.row)
+
+		elif self.status == 2:
+			msgScrape(self.row)
+
+		elif self.status == 3:
+			mark14Scrape(self.row)
+
+		elif self.status == 4:
+			mark15Scrape(self.row)
+
+		elif self.status == 5:
+			msgScrape(self.row)
+
+		elif self.status == 6:
+			msgScrape(self.row)
+
+		elif self.status == 7:
+			facScrape(self.row)
+
+		elif self.status == 8:
+			msgScrape(self.row)
+
+		threadLock.release()
+
+#fuction to scrape the row data of timetable
+def timeScrape(row):
+
+	cells = row.findAll('td')
+
+	#handeling the row with 1 column
+	if len(cells) == 1:
+
+		print "row_with_no_entries"
+
+	else:
+				
+		#for embedded labs or lab only courses
+		if len(cells) == 10:
+
+			#for embedded labs
+			if cells[1].getText().replace("\r\n\t\t","") in time_table.keys():
+
+				time_table[cells[1].getText().replace("\r\n\t\t","")+"_L"] = dict({("class_number",cells[0].getText().replace("\r\n\t\t","")), ("course_code",cells[1].getText().replace("\r\n\t\t","")), ("course_title",cells[2].getText().replace("\r\n\t\t","")), ("course_type",cells[3].getText().replace("\r\n\t\t","")), ("ltpjc",cells[4].getText().replace("\n\r\n\t\t\t\t","").replace("\r\n\t\t\t\t\n","")), ("course_mode",cells[5].getText().replace("\r\n\t\t","")), ("course_option",cells[6].getText().replace("\r\n\t\t","")), ("slot",cells[7].getText().replace("\r\n\t\t","")), ("venue",cells[8].getText().replace("\r\n\t\t","")), ("faculty",cells[9].getText().replace("\r\n\t\t",""))})
+
+			#for lab only courses
+			else:
+
+				time_table[cells[1].getText().replace("\r\n\t\t","")] = dict({("class_number",cells[0].getText().replace("\r\n\t\t","")), ("course_code",cells[1].getText().replace("\r\n\t\t","")), ("course_title",cells[2].getText().replace("\r\n\t\t","")), ("course_type",cells[3].getText().replace("\r\n\t\t","")), ("ltpjc",cells[4].getText().replace("\n\r\n\t\t\t\t","").replace("\r\n\t\t\t\t\n","")), ("course_mode",cells[5].getText().replace("\r\n\t\t","")), ("course_option",cells[6].getText().replace("\r\n\t\t","")), ("slot",cells[7].getText().replace("\r\n\t\t","")), ("venue",cells[8].getText().replace("\r\n\t\t","")), ("faculty",cells[9].getText().replace("\r\n\t\t",""))})
+
+		#for embedded theory		
+		else:
+
+			time_table[cells[3].getText().replace("\r\n\t\t","")] = dict({("class_number",cells[2].getText().replace("\r\n\t\t","")), ("course_code",cells[3].getText().replace("\r\n\t\t","")), ("course_title",cells[4].getText().replace("\r\n\t\t","")), ("course_type",cells[5].getText().replace("\r\n\t\t","")), ("ltpjc",cells[6].getText().replace("\n\r\n\t\t\t\t","").replace("\r\n\t\t\t\t\n","")), ("course_mode",cells[7].getText().replace("\r\n\t\t","")), ("course_option",cells[8].getText().replace("\r\n\t\t","")), ("slot",cells[9].getText().replace("\r\n\t\t","")), ("venue",cells[10].getText().replace("\r\n\t\t","")), ("faculty",cells[11].getText().replace("\r\n\t\t","")), ("registration_status",cells[12].getText().replace("\r\n\t\t",""))})
+
+#fuction to scrape the row data of marks
+def mark14scrape(row):
+
+	rowdata = []
+	assessments = []
+	cells = row.findAll('td')
+
+	for cell in cells:
+
+		value = cell.getText()
+		#print value
+		if value is u'' or value is u'N/A':
+
+			rowdata.append('0')
+					
+		else:
+
+			rowdata.append(value)
+
+	if len(cells) == 18:
+
+		assessments.append({"title" : "CAT-I", "max_marks" : 50, "weightage" : 15, "conducted_on" : "Check Exam Schedule", "status" : rowdata[5], "scored_marks" : rowdata[6], "scored_percentage" : (((float(rowdata[6]))/50)*15) })
+		assessments.append({"title" : "CAT-II", "max_marks" : 50, "weightage" : 15, "conducted_on" : "Check Exam Schedule", "status" : rowdata[7], "scored_marks" : rowdata[8], "scored_percentage" : (((float(rowdata[8]))/50)*15) })
+		assessments.append({"title" : "Quiz-I", "max_marks" : 5, "weightage" : 5, "conducted_on" : "Check Exam Schedule", "status" : rowdata[9], "scored_marks" : rowdata[10], "scored_percentage" : (((float(rowdata[10]))/5)*100) })
+		assessments.append({"title" : "Quiz-II", "max_marks" : 5, "weightage" : 5, "conducted_on" : "Check Exam Schedule", "status" : rowdata[11], "scored_marks" : rowdata[12], "scored_percentage" : (((float(rowdata[12]))/5)*100) })
+		assessments.append({"title" : "Quiz-III", "max_marks" : 5, "weightage" : 5, "conducted_on" : "Check Exam Schedule", "status" : rowdata[13], "scored_marks" : rowdata[14], "scored_percentage" : (((float(rowdata[14]))/5)*100) })
+		assessments.append({"title" : "Assignment", "max_marks" : 5, "weightage" : 5, "conducted_on" : "Check Exam Schedule", "status" : rowdata[15], "scored_marks" : rowdata[16], "scored_percentage" : (((float(rowdata[16]))/5)*100) })
+		#assessments.append({"title" : "FAT", "max_marks" : 100, "weightage" : 50, "conducted_on" : "Check Exam Schedule", "status" : rowdata[18], "scored_marks" : rowdata[19], "scored_percentage" : (((float(rowdata[19]))/100)*50) }) 
+
+		marks[rowdata[2].replace("\r\n\t\t","")] = {"assessments" : assessments, "max_marks" : 220, "max_percentage" : 100, "scored_marks" : (float(rowdata[6])+float(rowdata[8])+float(rowdata[10])+float(rowdata[12])+float(rowdata[14])+float(rowdata[16])), "scored_percentage" : ((((float(rowdata[6]))/50)*15)+(((float(rowdata[8]))/50)*15)+(float(rowdata[10]))+(float(rowdata[12]))+(float(rowdata[14]))+(float(rowdata[16])))}
+
+	elif len(cells) == 6:
+
+		print "no data"
+
+	else:
+
+		assessments.append({"title" : "Lab_cam", "max_marks" : 50, "weightage" : 50, "conducted_on" : "Tentative, set by lab faculty", "status" : rowdata[6], "scored_marks" : rowdata[7], "scored_percentage" : rowdata[7] })
+		#assessments.append({"title" : "FAT", "max_marks" : 50, "weightage" : 50, "conducted_on" : "Tentative, set by lab faculty", "status" : rowdata[8], "scored_marks" : rowdata[9], "scored_percentage" : rowdata[9] })
+		if rowdata[4] == "Embedded Lab":
+
+			marks[rowdata[2]+"_L"] = {"assessments" : assessments, "max_marks" : 100, "max_percentage" : 100, "scored_marks" : float(rowdata[7]), "scored_percentage" : (float(rowdata[7]))}
+
+		else:
+
+			marks[rowdata[2]] = {"assessments" : assessments, "max_marks" : 100, "max_percentage" : 100, "scored_marks" : float(rowdata[7]), "scored_percentage" : (float(rowdata[7]))}
+
+#fuction to scrape the row data of marks
+def mark15scrape(row):
+
+	rowdata = []
+	assessments = []
+	cells = row.findAll('td')
+
+	if len(cells) == 10:
+
+		for cell in cells:
+			value = cell.getText()
+
+			if value is u'' or value is u'N/A':
+				rowdata.append('0')
+						
+			else:
+				rowdata.append(value)
+
+
+		assessments.append({"title" : "CAT-I", "max_marks" : 50, "weightage" : 10, "conducted_on" : "Check Exam Schedule", "status" : rowdata[5], "scored_marks" : rowdata[6], "scored_percentage" : (((float(rowdata[6]))/50)*10) })
+		assessments.append({"title" : "CAT-II", "max_marks" : 50, "weightage" : 10, "conducted_on" : "Check Exam Schedule", "status" : rowdata[7], "scored_marks" : rowdata[8], "scored_percentage" : (((float(rowdata[8]))/50)*10) })
+		assessments.append({"title" : "Digital Assignment", "max_marks" : 30, "weightage" : 30, "conducted_on" : "Check Exam Schedule", "scored_marks" : rowdata[9], "scored_percentage" : rowdata[9] })
+
+		marks[rowdata[2].replace("\r\n\t\t","")] = {"assessments" : assessments, "max_marks" : 130, "max_percentage" : 50, "scored_marks" : (float(rowdata[6])+float(rowdata[8])+float(rowdata[9])), "scored_percentage" : ((((float(rowdata[6]))/50)*10)+(((float(rowdata[8]))/50)*10)+(float(rowdata[9])))}
+
+#fuction to scrape the row data of faculty advisor
+def facScrape(row):
+
+	cells = row.findChildren('td')
+
+	if len(cells) == 1:
+
+		print "nothing"
+
+	else:
+
+		faculty_advisor[cells[0].string.replace("\r\n\t\t","")] = cells[1].string.replace("\r\n\t\t","")
+
+#fuction to scrape the row data of messages
+def msgScrape(row):
+
+	cells = row.findChildren('td')
+				
+	messages.append({"From" : cells[0].string.replace("\r\n\t\t",""), "Course" : cells[1].string.replace("\r\n\t\t",""), "Message" : cells[2].string.replace("\r\n\t\t","").replace("\r\n"," "), "Posted on" : cells[3].string.replace("\r\n\t\t","")})
 
 class Refresh():
 
@@ -43,36 +206,23 @@ class Refresh():
 		rows = myTable.findChildren(['th','tr'])
 		rows = rows[1:]
 
+
 		#extracting data
 		for row in rows:
 
-			cells = row.findAll('td')
+			#creating thread for each row
+			thrd = myThread(row, 1)
+			#starting the thread
+			thrd.start()
 
-			#handeling the row with 1 column
-			if len(cells) == 1:
-				print "row_with_no_entries"
-				continue
+			#appending into thread list
+			threads.append(thrd)
+		
+		#waiting for each thread to complete
+		for t in threads:
+			t.join()
 
-			else:
-				
-				#for embedded labs or lab only courses
-				if len(cells) == 10:
-
-					#for embedded labs
-					if cells[1].getText().replace("\r\n\t\t","") in time_table.keys():
-
-						time_table[cells[1].getText().replace("\r\n\t\t","")+"_L"] = dict({("class_number",cells[0].getText().replace("\r\n\t\t","")), ("course_code",cells[1].getText().replace("\r\n\t\t","")), ("course_title",cells[2].getText().replace("\r\n\t\t","")), ("course_type",cells[3].getText().replace("\r\n\t\t","")), ("ltpjc",cells[4].getText().replace("\n\r\n\t\t\t\t","").replace("\r\n\t\t\t\t\n","")), ("course_mode",cells[5].getText().replace("\r\n\t\t","")), ("course_option",cells[6].getText().replace("\r\n\t\t","")), ("slot",cells[7].getText().replace("\r\n\t\t","")), ("venue",cells[8].getText().replace("\r\n\t\t","")), ("faculty",cells[9].getText().replace("\r\n\t\t",""))})
-
-					#for lab only courses
-					else:
-
-						time_table[cells[1].getText().replace("\r\n\t\t","")] = dict({("class_number",cells[0].getText().replace("\r\n\t\t","")), ("course_code",cells[1].getText().replace("\r\n\t\t","")), ("course_title",cells[2].getText().replace("\r\n\t\t","")), ("course_type",cells[3].getText().replace("\r\n\t\t","")), ("ltpjc",cells[4].getText().replace("\n\r\n\t\t\t\t","").replace("\r\n\t\t\t\t\n","")), ("course_mode",cells[5].getText().replace("\r\n\t\t","")), ("course_option",cells[6].getText().replace("\r\n\t\t","")), ("slot",cells[7].getText().replace("\r\n\t\t","")), ("venue",cells[8].getText().replace("\r\n\t\t","")), ("faculty",cells[9].getText().replace("\r\n\t\t",""))})
-
-				#for embedded theory		
-				else:
-
-					time_table[cells[3].getText().replace("\r\n\t\t","")] = dict({("class_number",cells[2].getText().replace("\r\n\t\t","")), ("course_code",cells[3].getText().replace("\r\n\t\t","")), ("course_title",cells[4].getText().replace("\r\n\t\t","")), ("course_type",cells[5].getText().replace("\r\n\t\t","")), ("ltpjc",cells[6].getText().replace("\n\r\n\t\t\t\t","").replace("\r\n\t\t\t\t\n","")), ("course_mode",cells[7].getText().replace("\r\n\t\t","")), ("course_option",cells[8].getText().replace("\r\n\t\t","")), ("slot",cells[9].getText().replace("\r\n\t\t","")), ("venue",cells[10].getText().replace("\r\n\t\t","")), ("faculty",cells[11].getText().replace("\r\n\t\t","")), ("registration_status",cells[12].getText().replace("\r\n\t\t",""))})
-
+		#returning the attendance
 		return time_table
 
 	def getAttendance(self):
@@ -151,53 +301,22 @@ class Refresh():
 		#extracting tables
 		tables = soup.findAll('table')
 		myTable = tables[1]
-		
+
+		#initialising some required variables
 		rows = myTable.findChildren(['th','tr'])
 		rows = rows[2:]
 
-		#getting marks for CBL/RBL courses
+		#extracting data
 		for row in rows:
 
-			rowdata = []
-			assessments = []
-			cells = row.findAll('td')
+			#creating thread for each row
+			thrd = myThread(row,3)
+			#starting the thread
+			thrd.start()
 
-			for cell in cells:
-				value = cell.getText()
+			#appending into thread list
+			threads.append(thrd)
 
-				if value is u'' or value is u'N/A':
-					rowdata.append('0')
-					
-				else:
-					rowdata.append(value)
-
-
-			if len(cells) == 18:
-
-				assessments.append({"title" : "CAT-I", "max_marks" : 50, "weightage" : 15, "conducted_on" : "Check Exam Schedule", "status" : rowdata[5], "scored_marks" : rowdata[6], "scored_percentage" : (((float(rowdata[6]))/50)*15) })
-				assessments.append({"title" : "CAT-II", "max_marks" : 50, "weightage" : 15, "conducted_on" : "Check Exam Schedule", "status" : rowdata[7], "scored_marks" : rowdata[8], "scored_percentage" : (((float(rowdata[8]))/50)*15) })
-				assessments.append({"title" : "Quiz-I", "max_marks" : 5, "weightage" : 5, "conducted_on" : "Check Exam Schedule", "status" : rowdata[9], "scored_marks" : rowdata[10], "scored_percentage" : rowdata[10] })
-				assessments.append({"title" : "Quiz-II", "max_marks" : 5, "weightage" : 5, "conducted_on" : "Check Exam Schedule", "status" : rowdata[11], "scored_marks" : rowdata[12], "scored_percentage" : rowdata[12] })
-				assessments.append({"title" : "Quiz-III", "max_marks" : 5, "weightage" : 5, "conducted_on" : "Check Exam Schedule", "status" : rowdata[13], "scored_marks" : rowdata[14], "scored_percentage" : rowdata[14] })
-				assessments.append({"title" : "Assignment", "max_marks" : 5, "weightage" : 5, "conducted_on" : "Check Exam Schedule", "status" : rowdata[15], "scored_marks" : rowdata[16], "scored_percentage" : rowdata[16] })
-				#assessments.append({"title" : "FAT", "max_marks" : 100, "weightage" : 50, "conducted_on" : "Check Exam Schedule", "status" : rowdata[18], "scored_marks" : rowdata[19], "scored_percentage" : (((float(rowdata[19]))/100)*50) }) 
-
-				marks[rowdata[2].replace("\r\n\t\t","")] = {"assessments" : assessments, "max_marks" : 220, "max_percentage" : 100, "scored_marks" : (float(rowdata[6])+float(rowdata[8])+float(rowdata[10])+float(rowdata[12])+float(rowdata[14])+float(rowdata[16])), "scored_percentage" : ((((float(rowdata[6]))/50)*15)+(((float(rowdata[8]))/50)*15)+(float(rowdata[10]))+(float(rowdata[12]))+(float(rowdata[14]))+(float(rowdata[16])))}
-			
-			elif len(cells) == 6:
-
-				continue
-			
-			else:
-
-				assessments.append({"title" : "Lab_cam", "max_marks" : 50, "weightage" : 50, "conducted_on" : "Tentative, set by lab faculty", "status" : rowdata[6], "scored_marks" : rowdata[7], "scored_percentage" : rowdata[7] })
-				#assessments.append({"title" : "FAT", "max_marks" : 50, "weightage" : 50, "conducted_on" : "Tentative, set by lab faculty", "status" : rowdata[8], "scored_marks" : rowdata[9], "scored_percentage" : rowdata[9] })
-				if rowdata[4] == "Embedded Lab":
-					marks[rowdata[2]+"_L"] = {"assessments" : assessments, "max_marks" : 100, "max_percentage" : 100, "scored_marks" : float(rowdata[7]), "scored_percentage" : (float(rowdata[7]))}
-				else:
-					marks[rowdata[2]] = {"assessments" : assessments, "max_marks" : 100, "max_percentage" : 100, "scored_marks" : float(rowdata[7]), "scored_percentage" : (float(rowdata[7]))}
-
-		#getting marks for PBL courses
 		try:
 
 			myTable = tables[2]
@@ -221,16 +340,17 @@ class Refresh():
 			for cell in cells:
 
 				value = cell.string
-				#print value
+
 				if value is u'' or value is u'N/A':
 
 					rowdata.append('0')
+
 				else:
 
 					rowdata.append(value)
 
 			if len(cells) == 11:
-
+				
 				key = rowdata[2].replace("\r\n\t\t","")
 				assessments.append({"title" : rowdata[6]})
 				assessments.append({"title" : rowdata[7]})
@@ -238,8 +358,7 @@ class Refresh():
 				assessments.append({"title" : rowdata[9]})
 				assessments.append({"title" : rowdata[10]})
 				#assessments.append({"title" : rowdata[11]})
-		
-
+				
 			else:
 
 				assessments[0][rowdata[0]] = rowdata[1]
@@ -255,6 +374,11 @@ class Refresh():
 				marks[key] = {"assessments" : assessments}
 				assessments = []
 
+		#waiting for each thread to complete
+		for t in threads:
+			t.join()
+
+		#returning the marks
 		return marks
 
 	def getMarks15(self):
@@ -271,32 +395,25 @@ class Refresh():
 		myTable = tables[1]
 
 		#initialising some required variables
-		marks = {}
 		rows = myTable.findChildren(['th','tr'])
 		rows = rows[2:]
 
 		#extracting data
 		for row in rows:
-			rowdata = []
-			assessments = []
-			cells = row.findAll('td')
 
-			if len(cells) == 10:
-				for cell in cells:
-					value = cell.getText()
+			#creating thread for each row
+			thrd = myThread(row, 4)
+			#starting the thread
+			thrd.start()
 
-					if value is u'' or value is u'N/A':
-						rowdata.append('0')
-						
-					else:
-						rowdata.append(value)
-			
-				assessments.append({"title" : "CAT-I", "max_marks" : 50, "weightage" : 10, "conducted_on" : "Check Exam Schedule", "status" : rowdata[5], "scored_marks" : rowdata[6], "scored_percentage" : (((float(rowdata[6]))/50)*10) })
-				assessments.append({"title" : "CAT-II", "max_marks" : 50, "weightage" : 10, "conducted_on" : "Check Exam Schedule", "status" : rowdata[7], "scored_marks" : rowdata[8], "scored_percentage" : (((float(rowdata[8]))/50)*10) })
-				assessments.append({"title" : "Digital Assignment", "max_marks" : 30, "weightage" : 30, "conducted_on" : "Check Exam Schedule", "scored_marks" : rowdata[9], "scored_percentage" : rowdata[9] })
+			#appending into thread list
+			threads.append(thrd)
 
-				marks[rowdata[2].replace("\r\n\t\t","")] = {"assessments" : assessments, "max_marks" : 130, "max_percentage" : 50, "scored_marks" : (float(rowdata[6])+float(rowdata[8])+float(rowdata[9])), "scored_percentage" : ((((float(rowdata[6]))/50)*10)+(((float(rowdata[8]))/50)*10)+(float(rowdata[9])))}
+		#waiting for each thread to complete
+		for t in threads:
+			t.join()
 
+		#returning marks
 		return marks
 
 	def getExamschedule(self):
@@ -373,7 +490,6 @@ class Refresh():
 
 				examSchedule["termend"] = p.get()
 
-		print examSchedule
 		return examSchedule
 
 	def getAcademicHistory(self):
@@ -459,16 +575,19 @@ class Refresh():
 		#extracting data
 		for row in rows:
 
-			cells = row.findChildren('td')
+			#creating thread for each row
+			thrd = myThread(row, 7)
+			#starting the thread
+			thrd.start()
 
-			if len(cells) == 1:
+			#appending into thread list
+			threads.append(thrd)
+		
+		#waiting for each thread to complete
+		for t in threads:
+			t.join()
 
-				continue
-
-			else:
-
-				faculty_advisor[cells[0].string.replace("\r\n\t\t","")] = cells[1].string.replace("\r\n\t\t","")
-
+		#returning faculty_advisor
 		return faculty_advisor
 
 	def getMessages(self):
@@ -491,13 +610,24 @@ class Refresh():
 
 			for row in rows[:-1]:
 
-				cells = row.findChildren('td')
-				
-				messages.append({"From" : cells[0].string.replace("\r\n\t\t",""), "Course" : cells[1].string.replace("\r\n\t\t",""), "Message" : cells[2].string.replace("\r\n\t\t","").replace("\r\n"," "), "Posted on" : cells[3].string.replace("\r\n\t\t","")})
+				#creating thread for each row
+				thrd = myThread(row, 8)
+				#starting the thread
+				thrd.start()
+
+				#appending into thread list
+				threads.append(thrd)
+		
+			#waiting for each thread to complete
+			for t in threads:
+				t.join()
+
+
 		except:
 
-			messages = []
+			print "nothing"
 
+		#returning messages
 		return messages
 
 

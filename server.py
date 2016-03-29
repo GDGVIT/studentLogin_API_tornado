@@ -1,7 +1,10 @@
 #importing the required tornado files
 import tornado.ioloop
 import tornado.web
+import tornado.options
+import tornado.httpserver
 from tornado import gen
+from tornado.options import define, options
 
 import os
 
@@ -23,8 +26,19 @@ from majorRoute import refresh
 #importing the mechanical borwser
 from mechanize import Browser
 
+define("port", default = 8000, help="Contact the One who made it Contact PIYUSH :P", type = int)
+
+#overloading the tornado.web.Application 
+class Application(tornado.web.Application):
+
+	def __init__(self):
+
+		handlers = [ (r"/", SampleHandler), (r"/login", LoginHandler), (r"/facadvdet", FacultyAdvisorHandler), (r"/timetable", TimetableHandler), (r"/attendance", AttendanceHandler), (r"/exam", ExamScheduleHandler), (r"/marks", MarksHandler), (r"/calmarks", CALHandler), (r"/spotlight", SpotlightHandler), (r"/acadhist", AcademicHistoryHandler), (r"/changepsswd", ChangePasswordHandler), (r"/message", MessageHandler), (r"/refresh", RefreshHandler)]
+		settings = dict(debug = True)
+		tornado.web.Application.__init__(self, handlers, **settings)
+
 #for knowing the API status
-class sampleHandler(tornado.web.RequestHandler):
+class SampleHandler(tornado.web.RequestHandler):
 
 	def post(self):
 		self.write("Hello!! And welcome To Student API in tornado")
@@ -44,7 +58,7 @@ class FacultyAdvisorHandler(tornado.web.RequestHandler):
 	def post(self):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
-		self.write(dict(Faculty_advisor_details = facultyAdvisor(regno, psswd)))
+		self.write(dict(Faculty_advisor_details = getFacultyAdvisor(regno, psswd)))
 
 #for getting the time table details
 class TimetableHandler(tornado.web.RequestHandler):
@@ -53,7 +67,7 @@ class TimetableHandler(tornado.web.RequestHandler):
 	def post(self):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
-		self.write(dict(timetable = getTimetable(regno, psswd)))
+		self.write(dict(Timetable = getTimetable(regno, psswd)))
 
 #for getting the attendance details
 class AttendanceHandler(tornado.web.RequestHandler):
@@ -62,7 +76,7 @@ class AttendanceHandler(tornado.web.RequestHandler):
 	def post(self):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
-		self.write(dict(attendance = attendanceDet(regno, psswd)))
+		self.write(dict(Attendance = getAttendance(regno, psswd)))
 
 #for getting the exam schedule details
 class ExamScheduleHandler(tornado.web.RequestHandler):
@@ -81,9 +95,9 @@ class MarksHandler(tornado.web.RequestHandler):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
 		if int(regno[0:2]) > 14:
-			self.write(dict(Faculty_advisor_details = marks15(regno, psswd)))
+			self.write(dict(Marks = getMarks15(regno, psswd)))
 		else:
-			self.write(dict(Faculty_advisor_details = marks14(regno, psswd)))
+			self.write(dict(Marks = getMarks14(regno, psswd)))
 
 #for getting the CAL marks details
 class CALHandler(tornado.web.RequestHandler):
@@ -93,15 +107,15 @@ class CALHandler(tornado.web.RequestHandler):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
 		if int(regno[0:2]) > 14:
-			self.write(dict(CAL_marks = calmarks(regno, psswd)))
+			self.write(dict(CAL_marks = getCalmarks(regno, psswd)))
 		else:
 			self.write(dict(status = "Not Supported"))
 
 #for getting the Spotlight details
 class SpotlightHandler(tornado.web.RequestHandler):
 
-	def get(self):
-		self.write(dict(Spotlight = spotlight()))
+	def post(self):
+		self.write(dict(Spotlight = getSpotlight()))
 
 #for getting the Academic History details
 class AcademicHistoryHandler(tornado.web.RequestHandler):
@@ -110,7 +124,7 @@ class AcademicHistoryHandler(tornado.web.RequestHandler):
 	def post(self):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
-		self.write(dict(Academic_History = academicHistory(regno, psswd)))
+		self.write(dict(Academic_History = getAcademicHistory(regno, psswd)))
 
 #for getting the statuss for changing password
 class ChangePasswordHandler(tornado.web.RequestHandler):
@@ -119,7 +133,7 @@ class ChangePasswordHandler(tornado.web.RequestHandler):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
 		npsswd = self.get_argument("npsswd")
-		self.write(dict(status = changePassword(regno, psswd, npsswd)))
+		self.write(dict(Status = changePassword(regno, psswd, npsswd)))
 
 #for getting the messages details
 class MessageHandler(tornado.web.RequestHandler):
@@ -128,7 +142,7 @@ class MessageHandler(tornado.web.RequestHandler):
 	def post(self):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
-		self.write(dict(message = getMessages(regno, psswd)))
+		self.write(dict(Message = getMessages(regno, psswd)))
 
 #for getting all the data
 class RefreshHandler(tornado.web.RequestHandler):
@@ -137,13 +151,11 @@ class RefreshHandler(tornado.web.RequestHandler):
 	def post(self):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
-		self.write(dict(data = refresh(regno, psswd)))
+		self.write(dict(Data = refresh(regno, psswd)))
 
 #main fuction to start the API
 if __name__ == "__main__":
-	application = tornado.web.Application([ (r"/", sampleHandler), (r"/login", LoginHandler), (r"/facadvdet", FacultyAdvisorHandler),
-	(r"/timetable", TimetableHandler), (r"/attendance", AttendanceHandler), (r"/exam", ExamScheduleHandler), (r"/makrs", MarksHandler),
-	(r"/calmarks", CALHandler), (r"/spotlight", SpotlightHandler), (r"/acadhist", AcademicHistoryHandler), (r"/changepsswd", ChangePasswordHandler),
-	(r"/message", MessageHandler), (r"/refresh", RefreshHandler)], debug = True)
-	application.listen(8888)
-	tornado.ioloop.IOLoop.current().start()
+	tornado.options.parse_command_line()
+	http_server = tornado.httpserver.HTTPServer(Application())
+	http_server.listen(options.port)
+	tornado.ioloop.IOLoop.instance().start()
