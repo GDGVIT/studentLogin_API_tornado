@@ -25,13 +25,13 @@ class myThread(threading.Thread):
 		self.reqvar = reqvar
 
 		#for attendance and cal
-		if self.status in [2,8]: 
+		if self.status in [2,8]:
 			self.i = args[0]
 			self.br = args[1]
 
 	#overloading the run function
 	def run(self):
-		
+
 		threadLock.acquire()
 
 		if self.status == 1:
@@ -71,7 +71,7 @@ def timeScrape(row, time_table):
 		print "row_with_no_entries"
 
 	else:
-				
+
 		#for embedded labs or lab only courses
 		if len(cells) == 10:
 
@@ -85,7 +85,7 @@ def timeScrape(row, time_table):
 
 				time_table[cells[1].getText().replace("\r\n\t\t","")] = dict({("class_number",cells[0].getText().replace("\r\n\t\t","")), ("course_code",cells[1].getText().replace("\r\n\t\t","")), ("course_title",cells[2].getText().replace("\r\n\t\t","")), ("course_type",cells[3].getText().replace("\r\n\t\t","")), ("ltpjc",cells[4].getText().replace("\n\r\n\t\t\t\t","").replace("\r\n\t\t\t\t\n","")), ("course_mode",cells[5].getText().replace("\r\n\t\t","")), ("course_option",cells[6].getText().replace("\r\n\t\t","")), ("slot",cells[7].getText().replace("\r\n\t\t","")), ("venue",cells[8].getText().replace("\r\n\t\t","")), ("faculty",cells[9].getText().replace("\r\n\t\t",""))})
 
-		#for embedded theory		
+		#for embedded theory
 		else:
 
 			time_table[cells[3].getText().replace("\r\n\t\t","")] = dict({("class_number",cells[2].getText().replace("\r\n\t\t","")), ("course_code",cells[3].getText().replace("\r\n\t\t","")), ("course_title",cells[4].getText().replace("\r\n\t\t","")), ("course_type",cells[5].getText().replace("\r\n\t\t","")), ("ltpjc",cells[6].getText().replace("\n\r\n\t\t\t\t","").replace("\r\n\t\t\t\t\n","")), ("course_mode",cells[7].getText().replace("\r\n\t\t","")), ("course_option",cells[8].getText().replace("\r\n\t\t","")), ("slot",cells[9].getText().replace("\r\n\t\t","")), ("venue",cells[10].getText().replace("\r\n\t\t","")), ("faculty",cells[11].getText().replace("\r\n\t\t","")), ("registration_status",cells[12].getText().replace("\r\n\t\t",""))})
@@ -112,8 +112,8 @@ def details(br):
 	except:
 		print "No_table"
 
-	br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
-	
+	br.open("https://vtop.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
+
 	return details
 
 #fuction to scrape the row data of timetable
@@ -144,7 +144,7 @@ def mark14Scrape(row, marks):
 		if value is u'' or value is u'N/A':
 
 			rowdata.append('0')
-					
+
 		else:
 
 			rowdata.append(value)
@@ -157,7 +157,7 @@ def mark14Scrape(row, marks):
 		assessments.append({"title" : "Quiz-II", "max_marks" : 5, "weightage" : 5, "conducted_on" : "Check Exam Schedule", "status" : rowdata[11], "scored_marks" : rowdata[12], "scored_percentage" : (((float(rowdata[12]))/5)*100) })
 		assessments.append({"title" : "Quiz-III", "max_marks" : 5, "weightage" : 5, "conducted_on" : "Check Exam Schedule", "status" : rowdata[13], "scored_marks" : rowdata[14], "scored_percentage" : (((float(rowdata[14]))/5)*100) })
 		assessments.append({"title" : "Assignment", "max_marks" : 5, "weightage" : 5, "conducted_on" : "Check Exam Schedule", "status" : rowdata[15], "scored_marks" : rowdata[16], "scored_percentage" : (((float(rowdata[16]))/5)*100) })
-		#assessments.append({"title" : "FAT", "max_marks" : 100, "weightage" : 50, "conducted_on" : "Check Exam Schedule", "status" : rowdata[18], "scored_marks" : rowdata[19], "scored_percentage" : (((float(rowdata[19]))/100)*50) }) 
+		#assessments.append({"title" : "FAT", "max_marks" : 100, "weightage" : 50, "conducted_on" : "Check Exam Schedule", "status" : rowdata[18], "scored_marks" : rowdata[19], "scored_percentage" : (((float(rowdata[19]))/100)*50) })
 
 		marks[rowdata[2].replace("\r\n\t\t","")] = {"assessments" : assessments, "max_marks" : 220, "max_percentage" : 100, "scored_marks" : (float(rowdata[6])+float(rowdata[8])+float(rowdata[10])+float(rowdata[12])+float(rowdata[14])+float(rowdata[16])), "scored_percentage" : ((((float(rowdata[6]))/50)*15)+(((float(rowdata[8]))/50)*15)+(float(rowdata[10]))+(float(rowdata[12]))+(float(rowdata[14]))+(float(rowdata[16])))}
 
@@ -191,7 +191,7 @@ def mark15Scrape(row, marks):
 
 			if value is u'' or value is u'N/A':
 				rowdata.append('0')
-						
+
 			else:
 				rowdata.append(value)
 
@@ -219,7 +219,7 @@ def facScrape(row, faculty_advisor):
 def msgScrape(row, messages):
 
 	cells = row.findChildren('td')
-				
+
 	messages.append({"From" : cells[0].string.replace("\r\n\t\t",""), "Course" : cells[1].string.replace("\r\n\t\t",""), "Message" : cells[2].string.replace("\r\n\t\t","").replace("\r\n"," "), "Posted on" : cells[3].string.replace("\r\n\t\t","")})
 
 #fuction to scrape the row data of academic history
@@ -261,11 +261,11 @@ def calScrape(br, row, i, calmarks):
 	#if table is present
 	try:
 		dmyTable = dtables[2]
-		
+
 	#if table is absent
 	except:
 
-		br.open("https://academics.vit.ac.in/student/cal_da.asp?sem=WS")
+		br.open("https://vtop.vit.ac.in/student/cal_da.asp?sem=WS")
 
 		if cells[2].getText().replace("\r\n\t\t","") not in calmarks.keys():
 
@@ -288,7 +288,7 @@ def calScrape(br, row, i, calmarks):
 			dcells = drow.findAll('td')
 			details.append({"assignment_title" : dcells[1].getText(), "due_date" : dcells[2].getText(),"max_marks" : dcells[3].getText() ,"assignment_status" : dcells[5].getText() if dcells[5].getText() else "NA", "marks_status" : dcells[7].getText() if dcells[7].getText() else "NA", "marks_score" : dcells[8].getText() if dcells[3].getText() else "NA"})
 
-		br.open("https://academics.vit.ac.in/student/cal_da.asp?sem=WS")
+		br.open("https://vtop.vit.ac.in/student/cal_da.asp?sem=WS")
 
 		if cells[2].getText().replace("\r\n\t\t","") not in calmarks.keys():
 
@@ -312,7 +312,7 @@ class Refresh():
 		self.br = login(reg_no,pswd)
 
 		#checking that are we logged in or not
-		if self.br.geturl() == ("https://academics.vit.ac.in/student/stud_home.asp") or self.br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
+		if self.br.geturl() == ("https://vtop.vit.ac.in/student/stud_home.asp") or self.br.geturl() == ("https://vtop.vit.ac.in/student/home.asp"):
 			print "SUCCESS"
 
 		else :
@@ -322,8 +322,8 @@ class Refresh():
 	def getTimetable(self, time_table):
 
 		#opening time table page
-		self.br.open("https://academics.vit.ac.in/student/timetable_ws.asp")
-		response = self.br.open("https://academics.vit.ac.in/student/timetable_ws.asp")
+		self.br.open("https://vtop.vit.ac.in/student/timetable_ws.asp")
+		response = self.br.open("https://vtop.vit.ac.in/student/timetable_ws.asp")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())
@@ -348,7 +348,7 @@ class Refresh():
 
 			#appending into thread list
 			threads.append(thrd)
-		
+
 		#waiting for each thread to complete
 		for t in threads:
 			t.join()
@@ -360,8 +360,8 @@ class Refresh():
 	def getAttendance(self, attendance):
 
 		#opening the attendance page
-		self.br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
-		response = self.br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
+		self.br.open("https://vtop.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
+		response = self.br.open("https://vtop.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
 		soup = BeautifulSoup(response.get_data())
 
 		#extracting tables
@@ -383,8 +383,8 @@ class Refresh():
 			#appending into thread list
 			threads.append(thrd)
 
-			i = i+1 
-		
+			i = i+1
+
 		#waiting for each thread to end
 		for t in threads:
 			t.join()
@@ -395,8 +395,8 @@ class Refresh():
 	def getMarks14(self, marks):
 
 		#opening marks page
-		self.br.open("https://academics.vit.ac.in/student/marks.asp?sem=WS")
-		response = self.br.open("https://academics.vit.ac.in/student/marks.asp?sem=WS")
+		self.br.open("https://vtop.vit.ac.in/student/marks.asp?sem=WS")
+		response = self.br.open("https://vtop.vit.ac.in/student/marks.asp?sem=WS")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())
@@ -454,7 +454,7 @@ class Refresh():
 					rowdata.append(value)
 
 			if len(cells) == 11:
-				
+
 				key = rowdata[2].replace("\r\n\t\t","")
 				assessments.append({"title" : rowdata[6]})
 				assessments.append({"title" : rowdata[7]})
@@ -462,7 +462,7 @@ class Refresh():
 				assessments.append({"title" : rowdata[9]})
 				assessments.append({"title" : rowdata[10]})
 				#assessments.append({"title" : rowdata[11]})
-				
+
 			else:
 
 				assessments[0][rowdata[0]] = rowdata[1]
@@ -489,8 +489,8 @@ class Refresh():
 	def getMarks15(self, marks):
 
 		#opening marks page
-		self.br.open("https://academics.vit.ac.in/student/marks.asp?sem=WS")
-		response = self.br.open("https://academics.vit.ac.in/student/marks.asp?sem=WS")
+		self.br.open("https://vtop.vit.ac.in/student/marks.asp?sem=WS")
+		response = self.br.open("https://vtop.vit.ac.in/student/marks.asp?sem=WS")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())
@@ -529,8 +529,8 @@ class Refresh():
 		import Queue as q
 
 		#opening exam schedule page
-		self.br.open("https://academics.vit.ac.in/student/exam_schedule.asp?sem=WS")
-		response = self.br.open("https://academics.vit.ac.in/student/exam_schedule.asp?sem=WS")
+		self.br.open("https://vtop.vit.ac.in/student/exam_schedule.asp?sem=WS")
+		response = self.br.open("https://vtop.vit.ac.in/student/exam_schedule.asp?sem=WS")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())
@@ -559,7 +559,7 @@ class Refresh():
 
 			#holding the cat1, cat2, termend schedules in queue
 			p = q.Queue()
-			
+
 			#extracting data
 			for row in rows:
 
@@ -600,8 +600,8 @@ class Refresh():
 	def getFacultyAdvisor(self, faculty_advisor):
 
 		#opening faculty advisor details page
-		self.br.open("https://academics.vit.ac.in/student/faculty_advisor_view.asp")
-		response = self.br.open("https://academics.vit.ac.in/student/faculty_advisor_view.asp")
+		self.br.open("https://vtop.vit.ac.in/student/faculty_advisor_view.asp")
+		response = self.br.open("https://vtop.vit.ac.in/student/faculty_advisor_view.asp")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())
@@ -621,7 +621,7 @@ class Refresh():
 
 			#appending into thread list
 			threads.append(thrd)
-		
+
 		#waiting for each thread to complete
 		for t in threads:
 			t.join()
@@ -633,8 +633,8 @@ class Refresh():
 	def getMessages(self, messages):
 
 		#opening the meesages page
-		self.br.open("https://academics.vit.ac.in/student/class_message_view.asp?sem=WS")
-		response = self.br.open("https://academics.vit.ac.in/student/class_message_view.asp?sem=WS")
+		self.br.open("https://vtop.vit.ac.in/student/class_message_view.asp?sem=WS")
+		response = self.br.open("https://vtop.vit.ac.in/student/class_message_view.asp?sem=WS")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())
@@ -657,7 +657,7 @@ class Refresh():
 
 				#appending into thread list
 				threads.append(thrd)
-		
+
 			#waiting for each thread to complete
 			for t in threads:
 				t.join()
@@ -674,8 +674,8 @@ class Refresh():
 	def getAcademicHistory(self, academicHistory):
 
 		#opening the academic history page
-		self.br.open("https://academics.vit.ac.in/student/student_history.asp")
-		response = self.br.open("https://academics.vit.ac.in/student/student_history.asp")
+		self.br.open("https://vtop.vit.ac.in/student/student_history.asp")
+		response = self.br.open("https://vtop.vit.ac.in/student/student_history.asp")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())
@@ -741,8 +741,8 @@ class Refresh():
 	def getCalMarks(self, calmarks):
 
 		#opening the cal marks page
-		self.br.open("https://academics.vit.ac.in/student/cal_da.asp?sem=WS")
-		response = self.br.open("https://academics.vit.ac.in/student/cal_da.asp?sem=WS")
+		self.br.open("https://vtop.vit.ac.in/student/cal_da.asp?sem=WS")
+		response = self.br.open("https://vtop.vit.ac.in/student/cal_da.asp?sem=WS")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())

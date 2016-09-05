@@ -8,12 +8,12 @@ def changePassword(reg_no = "", pwd = "", newpwd = ""):
 	br = login(reg_no,pwd)
 
 	#checking that are we logged in or not
-	if br.geturl() == ("https://academics.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
+	if br.geturl() == ("https://vtop.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://vtop.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
 		#opening the change password page
-		br.open("https://academics.vit.ac.in/student/changepswd.asp")
-		response = br.open("https://academics.vit.ac.in/student/changepswd.asp")
+		br.open("https://vtop.vit.ac.in/student/changepswd.asp")
+		response = br.open("https://vtop.vit.ac.in/student/changepswd.asp")
 
 		#selecting the form
 		br.select_form("changepswd")

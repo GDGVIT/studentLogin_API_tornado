@@ -64,8 +64,8 @@ def details(br):
 	except:
 		print "No_table"
 
-	br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
-	
+	br.open("https://vtop.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
+
 	return details
 
 def getAttendance(reg_no = "", pwd = ""):
@@ -74,12 +74,12 @@ def getAttendance(reg_no = "", pwd = ""):
 
 	print br.geturl()
 
-	if br.geturl() == ("https://academics.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
+	if br.geturl() == ("https://vtop.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://vtop.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
 		#opening the attendance page
-		br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
-		response = br.open("https://academics.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
+		br.open("https://vtop.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
+		response = br.open("https://vtop.vit.ac.in/student/attn_report.asp?sem=WS&fmdt=09-Jul-2015&todt=%(to_date)s" % {"to_date" : today })
 		soup = BeautifulSoup(response.get_data())
 
 		#extracting tables
@@ -100,8 +100,8 @@ def getAttendance(reg_no = "", pwd = ""):
 			#appending into thread list
 			threads.append(thrd)
 
-			i = i+1 
-		
+			i = i+1
+
 		#waiting for each thread to end
 		for t in threads:
 			t.join()

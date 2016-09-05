@@ -8,15 +8,15 @@ def getExamSchedule(reg_no = "", pwd = ""):
 	br = login(reg_no,pwd)
 
 	#checking that are we logged in or not
-	if br.geturl() == ("https://academics.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
+	if br.geturl() == ("https://vtop.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://vtop.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
 		#inmporting Queue
 		import Queue as q
 
 		#opening exam schedule page
-		br.open("https://academics.vit.ac.in/student/exam_schedule.asp?sem=WS")
-		response = br.open("https://academics.vit.ac.in/student/exam_schedule.asp?sem=WS")
+		br.open("https://vtop.vit.ac.in/student/exam_schedule.asp?sem=WS")
+		response = br.open("https://vtop.vit.ac.in/student/exam_schedule.asp?sem=WS")
 
 		#initializing required variables
 		examSchedule = {}
@@ -48,7 +48,7 @@ def getExamSchedule(reg_no = "", pwd = ""):
 
 			#holding the cat1, cat2, termend schedules in queue
 			p = q.Queue()
-			
+
 			#extracting data
 			for row in rows:
 

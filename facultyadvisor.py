@@ -18,11 +18,11 @@ class myThread(threading.Thread):
 
 	#overloading the run function
 	def run(self):
-		
+
 		threadLock.acquire()
 		scrape(self.row)
 		threadLock.release()
-		
+
 #fuction to scrape the row data
 def scrape(row):
 
@@ -43,12 +43,12 @@ def getFacultyAdvisor(reg_no = "", pwd = ""):
 	br = login(reg_no,pwd)
 
 	#checking that are we logged in or not
-	if br.geturl() == ("https://academics.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
+	if br.geturl() == ("https://vtop.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://vtop.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
 		#opening faculty advisor details page
-		br.open("https://academics.vit.ac.in/student/faculty_advisor_view.asp")
-		response = br.open("https://academics.vit.ac.in/student/faculty_advisor_view.asp")
+		br.open("https://vtop.vit.ac.in/student/faculty_advisor_view.asp")
+		response = br.open("https://vtop.vit.ac.in/student/faculty_advisor_view.asp")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())
@@ -68,7 +68,7 @@ def getFacultyAdvisor(reg_no = "", pwd = ""):
 
 			#appending into thread list
 			threads.append(thrd)
-		
+
 		#waiting for each thread to complete
 		for t in threads:
 			t.join()

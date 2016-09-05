@@ -20,11 +20,11 @@ class myThread(threading.Thread):
 
 	#overloading the run function
 	def run(self):
-		
+
 		threadLock.acquire()
 		scrape(self.row, self.status)
 		threadLock.release()
-		
+
 #fuction to scrape the row data
 def scrape(row, status):
 
@@ -55,12 +55,12 @@ def getAcademicHistory(reg_no = "", pwd = ""):
 	br = login(reg_no,pwd)
 
 	#checking that are we logged in or not
-	if br.geturl() == ("https://academics.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
+	if br.geturl() == ("https://vtop.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://vtop.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
 		#opening the academic history page
-		br.open("https://academics.vit.ac.in/student/student_history.asp")
-		response = br.open("https://academics.vit.ac.in/student/student_history.asp")
+		br.open("https://vtop.vit.ac.in/student/student_history.asp")
+		response = br.open("https://vtop.vit.ac.in/student/student_history.asp")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())

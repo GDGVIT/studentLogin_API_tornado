@@ -17,7 +17,7 @@ class myThread(threading.Thread):
 
 	#overloading the run function
 	def run(self):
-		
+
 		threadLock.acquire()
 		scrape(self.row)
 		threadLock.release()
@@ -36,7 +36,7 @@ def scrape(row):
 
 			if value is u'' or value is u'N/A':
 				rowdata.append('0')
-						
+
 			else:
 				rowdata.append(value)
 
@@ -54,12 +54,12 @@ def getMarks15(reg_no = "", pwd = ""):
 	br = login(reg_no,pwd)
 
 	#checking that are we logged in or not
-	if br.geturl() == ("https://academics.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
+	if br.geturl() == ("https://vtop.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://vtop.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
 		#opening marks page
-		br.open("https://academics.vit.ac.in/student/marks.asp?sem=WS")
-		response = br.open("https://academics.vit.ac.in/student/marks.asp?sem=WS")
+		br.open("https://vtop.vit.ac.in/student/marks.asp?sem=WS")
+		response = br.open("https://vtop.vit.ac.in/student/marks.asp?sem=WS")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())

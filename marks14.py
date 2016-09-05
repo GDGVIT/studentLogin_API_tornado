@@ -17,7 +17,7 @@ class myThread(threading.Thread):
 
 	#overloading the run function
 	def run(self):
-		
+
 		threadLock.acquire()
 		scrape(self.row)
 		threadLock.release()
@@ -36,7 +36,7 @@ def scrape(row):
 		if value is u'' or value is u'N/A':
 
 			rowdata.append('0')
-					
+
 		else:
 
 			rowdata.append(value)
@@ -49,7 +49,7 @@ def scrape(row):
 		assessments.append({"title" : "Quiz-II", "max_marks" : 5, "weightage" : 5, "conducted_on" : "Check Exam Schedule", "status" : rowdata[11], "scored_marks" : rowdata[12], "scored_percentage" : (((float(rowdata[12]))/5)*100) })
 		assessments.append({"title" : "Quiz-III", "max_marks" : 5, "weightage" : 5, "conducted_on" : "Check Exam Schedule", "status" : rowdata[13], "scored_marks" : rowdata[14], "scored_percentage" : (((float(rowdata[14]))/5)*100) })
 		assessments.append({"title" : "Assignment", "max_marks" : 5, "weightage" : 5, "conducted_on" : "Check Exam Schedule", "status" : rowdata[15], "scored_marks" : rowdata[16], "scored_percentage" : (((float(rowdata[16]))/5)*100) })
-		#assessments.append({"title" : "FAT", "max_marks" : 100, "weightage" : 50, "conducted_on" : "Check Exam Schedule", "status" : rowdata[18], "scored_marks" : rowdata[19], "scored_percentage" : (((float(rowdata[19]))/100)*50) }) 
+		#assessments.append({"title" : "FAT", "max_marks" : 100, "weightage" : 50, "conducted_on" : "Check Exam Schedule", "status" : rowdata[18], "scored_marks" : rowdata[19], "scored_percentage" : (((float(rowdata[19]))/100)*50) })
 
 		marks[rowdata[2].replace("\r\n\t\t","")] = {"assessments" : assessments, "max_marks" : 220, "max_percentage" : 100, "scored_marks" : (float(rowdata[6])+float(rowdata[8])+float(rowdata[10])+float(rowdata[12])+float(rowdata[14])+float(rowdata[16])), "scored_percentage" : ((((float(rowdata[6]))/50)*15)+(((float(rowdata[8]))/50)*15)+(float(rowdata[10]))+(float(rowdata[12]))+(float(rowdata[14]))+(float(rowdata[16])))}
 
@@ -76,12 +76,12 @@ def getMarks14(reg_no = "", pwd = ""):
 	br = login(reg_no,pwd)
 
 	#checking that are we logged in or not
-	if br.geturl() == ("https://academics.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
+	if br.geturl() == ("https://vtop.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://vtop.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
 		#opening marks page
-		br.open("https://academics.vit.ac.in/student/marks.asp?sem=WS")
-		response = br.open("https://academics.vit.ac.in/student/marks.asp?sem=WS")
+		br.open("https://vtop.vit.ac.in/student/marks.asp?sem=WS")
+		response = br.open("https://vtop.vit.ac.in/student/marks.asp?sem=WS")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())
@@ -146,7 +146,7 @@ def getMarks14(reg_no = "", pwd = ""):
 				assessments.append({"title" : rowdata[9]})
 				assessments.append({"title" : rowdata[10]})
 				#assessments.append({"title" : rowdata[11]})
-				
+
 			else:
 
 				assessments[0][rowdata[0]] = rowdata[1]
@@ -165,7 +165,7 @@ def getMarks14(reg_no = "", pwd = ""):
 		#waiting for each thread to complete
 		for t in threads:
 			t.join()
-			
+
 		return {"status" : "Success" , "marks" : marks}
 
 	else :

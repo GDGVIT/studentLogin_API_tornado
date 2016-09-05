@@ -28,7 +28,7 @@ from mechanize import Browser
 
 define("port", default = 8000, help="Contact the One who made it Contact PIYUSH :P", type = int)
 
-#overloading the tornado.web.Application 
+#overloading the tornado.web.Application
 class Application(tornado.web.Application):
 
 	def __init__(self):
@@ -62,8 +62,8 @@ class FacultyAdvisorHandler(tornado.web.RequestHandler):
 
 #for getting the time table details
 class TimetableHandler(tornado.web.RequestHandler):
-	
-	@gen.coroutine	
+
+	@gen.coroutine
 	def post(self):
 		regno = self.get_argument("regNo")
 		psswd = self.get_argument("psswd")
