@@ -37,11 +37,11 @@ def scrape(br, row, i, calmarks):
 	#if table is present
 	try:
 		dmyTable = dtables[2]
-		
+
 	#if table is absent
 	except:
 
-		br.open("https://academics.vit.ac.in/student/cal_da.asp?sem=WS")
+		br.open("https://vtop.vit.ac.in/student/cal_da.asp?sem=WS")
 
 		if cells[2].getText().replace("\r\n\t\t","") not in calmarks.keys():
 
@@ -64,7 +64,7 @@ def scrape(br, row, i, calmarks):
 			dcells = drow.findAll('td')
 			details.append({"assignment_title" : dcells[1].getText(), "due_date" : dcells[2].getText(),"max_marks" : dcells[3].getText() ,"assignment_status" : dcells[5].getText() if dcells[5].getText() else "NA", "marks_status" : dcells[7].getText() if dcells[7].getText() else "NA", "marks_score" : dcells[8].getText() if dcells[3].getText() else "NA"})
 
-		br.open("https://academics.vit.ac.in/student/cal_da.asp?sem=WS")
+		br.open("https://vtop.vit.ac.in/student/cal_da.asp?sem=WS")
 
 		if cells[2].getText().replace("\r\n\t\t","") not in calmarks.keys():
 
@@ -84,12 +84,12 @@ def getCalmarks(reg_no = "", pwd = ""):
 	br = login(reg_no,pwd)
 
 	#checking that are we logged in or not
-	if br.geturl() == ("https://academics.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
+	if br.geturl() == ("https://vtop.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://vtop.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
 		#opening the cal marks page
-		br.open("https://academics.vit.ac.in/student/cal_da.asp?sem=WS")
-		response = br.open("https://academics.vit.ac.in/student/cal_da.asp?sem=WS")
+		br.open("https://vtop.vit.ac.in/student/cal_da.asp?sem=WS")
+		response = br.open("https://vtop.vit.ac.in/student/cal_da.asp?sem=WS")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())

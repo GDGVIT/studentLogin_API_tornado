@@ -16,7 +16,7 @@ def login(reg_no="",pwd=""):
 	br.set_handle_referer(True)
 
 	#opening website
-	response = br.open("https://academics.vit.ac.in/student/stud_login.asp")
+	response = br.open("https://vtop.vit.ac.in/student/stud_login.asp")
 	#print br.geturl()
 
 	#selecting the login form
@@ -28,7 +28,7 @@ def login(reg_no="",pwd=""):
 	#print img['src']
 
 	#retrieving captcha image
-	br.retrieve("https://academics.vit.ac.in/student/"+img['src'], reg_no+".bmp")
+	br.retrieve("https://vtop.vit.ac.in/student/"+img['src'], reg_no+".bmp")
 	print "captcha retrieved"
 
 	#opening the image
@@ -53,7 +53,7 @@ def login(reg_no="",pwd=""):
 	#during the time of rivera
 	try:
 
-		br.open("https://academics.vit.ac.in/student/stud_home.asp")
+		br.open("https://vtop.vit.ac.in/student/stud_home.asp")
 		br.select_form("stud_riviera")
 		br.submit(label = "Skip Now")
 		print "Login_Sucess"
@@ -62,5 +62,5 @@ def login(reg_no="",pwd=""):
 	except:
 
 		print "Login_Sucess"
-		
+
 	return br

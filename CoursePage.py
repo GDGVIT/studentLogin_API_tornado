@@ -7,11 +7,11 @@ def get_courses(reg_no = "", pwd = ""):
 
 	print br.geturl()
 
-	if br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
+	if br.geturl() == ("https://vtop.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
-		br.open("https://academics.vit.ac.in/student/coursepage_view.asp?sem=FS")
-		response = br.open("https://academics.vit.ac.in/student/coursepage_view.asp?sem=FS")
+		br.open("https://vtop.vit.ac.in/student/coursepage_view.asp?sem=FS")
+		response = br.open("https://vtop.vit.ac.in/student/coursepage_view.asp?sem=FS")
 		soup = BeautifulSoup(response.get_data())
 
 		br.select_form("coursepage_view")
@@ -41,11 +41,11 @@ def get_slot(reg_no = "", pwd = "", coursekey = ""):
 
 	print br.geturl()
 
-	if br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
+	if br.geturl() == ("https://vtop.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
-		br.open("https://academics.vit.ac.in/student/coursepage_view.asp?sem=FS&crs=%(key)s&slt=&fac=" % {"key" : coursekey})
-		response = br.open("https://academics.vit.ac.in/student/coursepage_view.asp?sem=FS&crs=%(key)s&slt=&fac=" % {"key" : coursekey})
+		br.open("https://vtop.vit.ac.in/student/coursepage_view.asp?sem=FS&crs=%(key)s&slt=&fac=" % {"key" : coursekey})
+		response = br.open("https://vtop.vit.ac.in/student/coursepage_view.asp?sem=FS&crs=%(key)s&slt=&fac=" % {"key" : coursekey})
 		soup = BeautifulSoup(response.get_data())
 
 		br.select_form("coursepage_view")
@@ -75,13 +75,13 @@ def get_faculty(reg_no = "", pwd = "", coursekey = "", slotkey = ""):
 
 	print br.geturl()
 
-	if br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
+	if br.geturl() == ("https://vtop.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
-		br.open("https://academics.vit.ac.in/student/coursepage_view.asp?sem=FS&crs=%(ckey)s&slt=%(skey)s&fac=" % {"ckey" : coursekey, "skey": slotkey})
-		response = br.open("https://academics.vit.ac.in/student/coursepage_view.asp?sem=FS&crs=%(key)s&slt=%(skey)s&fac=" % {"key" : coursekey, "skey" : slotkey})
+		br.open("https://vtop.vit.ac.in/student/coursepage_view.asp?sem=FS&crs=%(ckey)s&slt=%(skey)s&fac=" % {"ckey" : coursekey, "skey": slotkey})
+		response = br.open("https://vtop.vit.ac.in/student/coursepage_view.asp?sem=FS&crs=%(key)s&slt=%(skey)s&fac=" % {"key" : coursekey, "skey" : slotkey})
 		soup = BeautifulSoup(response.get_data())
-		
+
 		br.select_form("coursepage_view")
 
 		#print br.read()
@@ -90,7 +90,7 @@ def get_faculty(reg_no = "", pwd = "", coursekey = "", slotkey = ""):
 		#print forms[1]
 		options = forms[2].findAll("option")
 		options = options[1:]
-		
+
 		slot = {}
 
 		for o in options:
@@ -110,14 +110,14 @@ def get_data(reg_no = "", pwd = "", coursekey = "", slotkey = "", fackey = ""):
 
 	print br.geturl()
 
-	if br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
+	if br.geturl() == ("https://vtop.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
 		def select_form(form):
 			return form.attrs.get('action', None) == 'coursepage_view3.asp'
 
-		br.open("https://academics.vit.ac.in/student/coursepage_view.asp?sem=FS&crs=%(ckey)s&slt=%(skey)s&fac=%(fkey)s" % {"ckey" : coursekey, "skey": slotkey, "fkey" : fackey})
-		response = br.open("https://academics.vit.ac.in/student/coursepage_view.asp?sem=FS&crs=%(key)s&slt=%(skey)s&fac=%(fkey)s" % {"key" : coursekey, "skey" : slotkey, "fkey" : fackey})
+		br.open("https://vtop.vit.ac.in/student/coursepage_view.asp?sem=FS&crs=%(ckey)s&slt=%(skey)s&fac=%(fkey)s" % {"ckey" : coursekey, "skey": slotkey, "fkey" : fackey})
+		response = br.open("https://vtop.vit.ac.in/student/coursepage_view.asp?sem=FS&crs=%(key)s&slt=%(skey)s&fac=%(fkey)s" % {"key" : coursekey, "skey" : slotkey, "fkey" : fackey})
 		soup = BeautifulSoup(response.get_data())
 
 		#form = soup.find("form",)

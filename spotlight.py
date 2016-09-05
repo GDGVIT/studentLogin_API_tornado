@@ -27,13 +27,13 @@ class Spotlight():
 	#for getting academic spotlight
 	def acadSpotlight(self):
 
-		#opening the academics spotlight page
-		self.br.open("https://academics.vit.ac.in/include_spotlight_part01.asp")
-		response = self.br.open("https://academics.vit.ac.in/include_spotlight_part01.asp")
+		#opening the vtop spotlight page
+		self.br.open("https://vtop.vit.ac.in/include_spotlight_part01.asp")
+		response = self.br.open("https://vtop.vit.ac.in/include_spotlight_part01.asp")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())
-		
+
 		tables = soup.findAll('table')
 
 		#getting the required table
@@ -48,7 +48,7 @@ class Spotlight():
 
 			if row.find('a') is not None:
 
-				link = "https://academics.vit.ac.in/"+row.find('a')['href']
+				link = "https://vtop.vit.ac.in/"+row.find('a')['href']
 
 			else:
 
@@ -66,12 +66,12 @@ class Spotlight():
 	def coeSpotlight(self):
 
 		#opening the COE soptling page
-		self.br.open("https://academics.vit.ac.in/include_spotlight_part02.asp")
-		response = self.br.open("https://academics.vit.ac.in/include_spotlight_part02.asp")
+		self.br.open("https://vtop.vit.ac.in/include_spotlight_part02.asp")
+		response = self.br.open("https://vtop.vit.ac.in/include_spotlight_part02.asp")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())
-		
+
 		#if tabel is present
 		try:
 
@@ -87,7 +87,7 @@ class Spotlight():
 
 				if row.find('a') is not None:
 
-					link = "https://academics.vit.ac.in/"+row.find('a')['href'] 
+					link = "https://vtop.vit.ac.in/"+row.find('a')['href']
 
 				else:
 
@@ -109,14 +109,14 @@ class Spotlight():
 	def researchSpotlight(self):
 
 		#opening the research spotlight
-		self.br.open("https://academics.vit.ac.in/include_spotlight_part03.asp")
-		response = self.br.open("https://academics.vit.ac.in/include_spotlight_part03.asp")
+		self.br.open("https://vtop.vit.ac.in/include_spotlight_part03.asp")
+		response = self.br.open("https://vtop.vit.ac.in/include_spotlight_part03.asp")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())
 
 		#if table is present
-		try:		
+		try:
 
 			tables = soup.findAll('table')
 			myTable = tables[0]
@@ -129,7 +129,7 @@ class Spotlight():
 
 				if row.find('a') is not None:
 
-					link = "https://academics.vit.ac.in/"+row.find('a')['href'] 
+					link = "https://vtop.vit.ac.in/"+row.find('a')['href']
 
 				else:
 
@@ -165,4 +165,4 @@ def getSpotlight():
 	coeThread.join()
 	researchThread.join()
 
-	return {"status" : "Success" , "academics" : acad, "COE" : coe , "research" : research}
+	return {"status" : "Success" , "vtop" : acad, "COE" : coe , "research" : research}

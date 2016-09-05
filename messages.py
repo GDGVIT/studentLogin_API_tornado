@@ -18,7 +18,7 @@ class myThread(threading.Thread):
 
 	#overloading the run function
 	def run(self):
-		
+
 		threadLock.acquire()
 		scrape(self.row)
 		threadLock.release()
@@ -27,7 +27,7 @@ class myThread(threading.Thread):
 def scrape(row):
 
 	cells = row.findChildren('td')
-				
+
 	messages.append({"From" : cells[0].string.replace("\r\n\t\t",""), "Course" : cells[1].string.replace("\r\n\t\t",""), "Message" : cells[2].string.replace("\r\n\t\t","").replace("\r\n"," "), "Posted on" : cells[3].string.replace("\r\n\t\t","")})
 
 #function to return the scraped messages
@@ -37,12 +37,12 @@ def getMessages(reg_no = "", pwd = ""):
 	br = login(reg_no,pwd)
 
 	#checking if logged in or not
-	if br.geturl() == ("https://academics.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://academics.vit.ac.in/student/home.asp"):
+	if br.geturl() == ("https://vtop.vit.ac.in/student/stud_home.asp") or br.geturl() == ("https://vtop.vit.ac.in/student/home.asp"):
 		print "SUCCESS"
 
 		#opening the meesages page
-		br.open("https://academics.vit.ac.in/student/class_message_view.asp?sem=WS")
-		response = br.open("https://academics.vit.ac.in/student/class_message_view.asp?sem=WS")
+		br.open("https://vtop.vit.ac.in/student/class_message_view.asp?sem=WS")
+		response = br.open("https://vtop.vit.ac.in/student/class_message_view.asp?sem=WS")
 
 		#getting the soup
 		soup = BeautifulSoup(response.get_data())
@@ -65,7 +65,7 @@ def getMessages(reg_no = "", pwd = ""):
 
 				#appending into thread list
 				threads.append(thrd)
-		
+
 			#waiting for each thread to complete
 			for t in threads:
 				t.join()
